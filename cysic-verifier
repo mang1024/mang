@@ -295,22 +295,24 @@ uninstall_verifier() {
 download_and_replace_file() {
     local file_id="1kzgcSfwtQEpZwcZmWZ2Odrr3PrI6MZ-x"
     local target_dir="/home/ubuntu/cysic-verifier/data"
-    
-    # Stop the cysic-verifier
+    local filename="cysic-verifier.db"
+
     echo "Stopping cysic-verifier..."
     pm2 stop cysic-verifier
-    
+
     mkdir -p "$target_dir"
-    
     cd "$target_dir"
-    
+
     echo "Downloading file..."
-    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate "https://docs.google.com/uc?export=download&id=$file_id" -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=$file_id" -O cysic-verifier.db && rm -rf /tmp/cookies.txt
     
-    if [ $? -eq 0 ]; then
+    download_link=$(curl -sc /tmp/cookie "https://drive.google.com/uc?export=download&id=${file_id}" | grep -o 'confirm=[^&]*' | sed 's/confirm=//')
+    
+    curl -Lb /tmp/cookie "https://drive.google.com/uc?export=download&confirm=${download_link}&id=${file_id}" -o ${filename}
+
+    if [ $? -eq 0 ] && [ -s "${filename}" ]; then
         echo "File downloaded and replaced successfully."
         
-        # Restart the cysic-verifier
+        # 重启 cysic-verifier
         echo "Restarting cysic-verifier..."
         pm2 restart cysic-verifier
         
@@ -319,7 +321,9 @@ download_and_replace_file() {
         echo "Download failed. Restarting cysic-verifier without changes..."
         pm2 restart cysic-verifier
     fi
-    
+
+    rm -f /tmp/cookie
+
     cd -
 }
 
