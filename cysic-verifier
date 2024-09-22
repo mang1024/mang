@@ -132,7 +132,7 @@ show_menu() {
             echo "7. Stop Verifier"
             echo "8. Uninstall Verifier"
             echo "9. Exit"
-            echo "10. Extend Memory (Run this command if killed due to insufficient memory)"
+            echo "10. Extend the system's virtual memory (Run this command if killed due to insufficient memory)"
             ;;
         2)  # 中文
             echo "免费分享----------作者: mang"
@@ -147,7 +147,7 @@ show_menu() {
             echo "7. 停止运行验证器"
             echo "8. 卸载验证器"
             echo "9. 退出"
-            echo "10. 扩展内存（如果因内存不足，killed）运行此命令"
+            echo "10. 扩展系统的虚拟内存（如果因内存不足，killed）运行此命令"
             ;;
         3)  # 한국어
             echo "무료 공유----------作者: mang"
@@ -162,7 +162,7 @@ show_menu() {
             echo "7. Verifier 중지"
             echo "8. Verifier 제거"
             echo "9. 종료"
-            echo "10. 메모리 확장 (메모리 부족으로 종료된 경우 이 명령어를 실행하세요)"
+            echo "10. 시스템의 가상 메모리 확장 (메모리 부족으로 종료된 경우 이 명령어를 실행하세요)"
             ;;
     esac
     echo "----------------------------------------"
