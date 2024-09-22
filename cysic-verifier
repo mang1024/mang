@@ -29,7 +29,6 @@ msgs_en=(
     "Cysic Verifier has been uninstalled."
     "Configure Swap Memory"
     "Swap memory configured successfully."
-    "Synchronizing block information（Only applicable for first-time node users）"
 )
 
 msgs_zh=(
@@ -61,7 +60,6 @@ msgs_zh=(
     "Cysic 验证器已卸载。"
     "配置 Swap 内存"
     "Swap 内存配置成功。"
-    "同步区块信息（仅适用首次运行节点用户）"
 )
 msgs_ko=(
     "언어 선택:"
@@ -92,8 +90,6 @@ msgs_ko=(
     "Cysic 검증자가 제거되었습니다."
     "스왑 메모리 구성"
     "스왑 메모리가 성공적으로 구성되었습니다."
-    "블록 정보 동기화（노드 최초 실행 사용자에게만 적용）"
-
 )
 
 LANG_OPTIONS=("English" "中文" "한국어")
@@ -137,7 +133,6 @@ show_menu() {
             echo "8. Uninstall Verifier"
             echo "9. Exit"
             echo "10. Extend Memory (Run this command if killed due to insufficient memory)"
-            echo "11. ${msgs[28]}" 
             ;;
         2)  # 中文
             echo "免费分享----------作者: mang"
@@ -153,7 +148,6 @@ show_menu() {
             echo "8. 卸载验证器"
             echo "9. 退出"
             echo "10. 扩展内存（如果因内存不足，killed）运行此命令"
-            echo "11. ${msgs[28]}" 
             ;;
         3)  # 한국어
             echo "무료 공유----------作者: mang"
@@ -169,7 +163,6 @@ show_menu() {
             echo "8. Verifier 제거"
             echo "9. 종료"
             echo "10. 메모리 확장 (메모리 부족으로 종료된 경우 이 명령어를 실행하세요)"
-            echo "11. ${msgs[28]}" 
             ;;
     esac
     echo "----------------------------------------"
@@ -292,41 +285,6 @@ uninstall_verifier() {
     echo "${msgs[25]}"
 }
 
-download_and_replace_file() {
-    local file_id="1kzgcSfwtQEpZwcZmWZ2Odrr3PrI6MZ-x"
-    local target_dir="/home/ubuntu/cysic-verifier/data"
-    local filename="cysic-verifier.db"
-
-    echo "Stopping cysic-verifier..."
-    pm2 stop cysic-verifier
-
-    mkdir -p "$target_dir"
-    cd "$target_dir"
-
-    echo "Downloading file..."
-    
-    download_link=$(curl -sc /tmp/cookie "https://drive.google.com/uc?export=download&id=${file_id}" | grep -o 'confirm=[^&]*' | sed 's/confirm=//')
-    
-    curl -Lb /tmp/cookie "https://drive.google.com/uc?export=download&confirm=${download_link}&id=${file_id}" -o ${filename}
-
-    if [ $? -eq 0 ] && [ -s "${filename}" ]; then
-        echo "File downloaded and replaced successfully."
-        
-        # 重启 cysic-verifier
-        echo "Restarting cysic-verifier..."
-        pm2 restart cysic-verifier
-        
-        echo "Process completed."
-    else
-        echo "Download failed. Restarting cysic-verifier without changes..."
-        pm2 restart cysic-verifier
-    fi
-
-    rm -f /tmp/cookie
-
-    cd -
-}
-
 while true; do
     show_menu
     read -p "${msgs[1]}" choice
@@ -341,7 +299,6 @@ while true; do
         8) uninstall_verifier ;;
         9) exit 0 ;;
         10) configure_swap ;; 
-        11) download_and_replace_file ;;
         *) echo "${msgs[2]}" ;;
     esac
     echo
