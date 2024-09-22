@@ -4,7 +4,7 @@ msgs_en=(
     "Choose language:"
     "Enter your choice: "
     "Invalid choice. Please try again."
-    "One-click Start Cysic Verifier"
+    "One-click Run Cysic Verifier"
     "Install Node.js and PM2"
     "Download and configure Cysic Verifier"
     "Set reward address"
