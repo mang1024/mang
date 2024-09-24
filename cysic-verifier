@@ -189,9 +189,33 @@ EOF
 }
 
 install_and_configure_verifier() {
-    curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-    sudo npm install pm2 -g
+    echo "Installing Node.js and PM2..."
+    if ! curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -; then
+        echo "Failed to add NodeSource repository. Trying alternative method..."
+        sudo apt update
+        if ! curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -; then
+            echo "Failed to add NodeSource repository for Node.js 16.x. Exiting."
+            return 1
+        fi
+    fi
+
+    if ! sudo apt-get install -y nodejs; then
+        echo "Failed to install Node.js. Exiting."
+        return 1
+    fi
+
+    node -v
+    npm -v
+
+    if ! sudo npm install pm2 -g; then
+        echo "Failed to install PM2 using npm. Trying alternative method..."
+        if ! sudo apt install -y npm && sudo npm install pm2 -g; then
+            echo "Failed to install PM2. Exiting."
+            return 1
+        fi
+    fi
+
+    pm2 -v
 
     echo "Configuring Cysic Verifier..."
     rm -rf ~/cysic-verifier
