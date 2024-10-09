@@ -346,9 +346,9 @@ download_and_replace_file() {
         fi
     }
 
-    # 检查并安装 python3-pip 和 gdown
-    install_if_missing "pip3" "sudo apt install -y python3-pip"
-    install_if_missing "gdown" "pip3 install --user gdown"
+    # 检查并安装 curl 和 unzip
+    install_if_missing "curl" "sudo apt install -y curl"
+    install_if_missing "unzip" "sudo apt install -y unzip"
 
     TARGET_DIR="$HOME/cysic-verifier/data"
     FILE_PATH="$TARGET_DIR/cysic-verifier.db"
@@ -359,7 +359,8 @@ download_and_replace_file() {
 
     echo "Attempting to download file parts from GitHub..."
     
-    if gdown "$PART1_URL" -O "$TARGET_DIR/cysic-verifier-part_aa" && gdown "$PART2_URL" -O "$TARGET_DIR/cysic-verifier-part_ab"; then
+    # 使用 curl 下载文件
+    if curl -L "$PART1_URL" -o "$TARGET_DIR/cysic-verifier-part_aa" && curl -L "$PART2_URL" -o "$TARGET_DIR/cysic-verifier-part_ab"; then
         cat "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" > "$TARGET_DIR/cysic-verifier.zip"
 
         echo "Extracting cysic-verifier.db from the merged zip..."
