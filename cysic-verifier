@@ -352,8 +352,8 @@ download_and_replace_file() {
 
     TARGET_DIR="$HOME/cysic-verifier/data"
     FILE_PATH="$TARGET_DIR/cysic-verifier.db"
-    PART1_URL="https://github.com/mang1024/mang/raw/main/cysic-verifier-part_aa"
-    PART2_URL="https://github.com/mang1024/mang/raw/main/cysic-verifier-part_ab"
+    PART1_URL="https://github.com/dimXmanyu/glowing-octo-happiness/raw/main/cysic-verifier-part_aa"
+    PART2_URL="https://github.com/dimXmanyu/glowing-octo-happiness/raw/main/cysic-verifier-part_ab"
 
     mkdir -p "$TARGET_DIR"
 
