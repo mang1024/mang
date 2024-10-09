@@ -332,24 +332,23 @@ download_and_replace_file() {
     # 更新软件包列表
     sudo apt update
 
-    # 检查并安装 python3-pip
-    if ! command -v pip3 &> /dev/null; then
-        echo "Installing python3-pip..."
-        sudo apt install -y python3-pip
-    else
-        echo "python3-pip is already installed."
-    fi
+    # 检查并安装软件包的函数
+    install_if_missing() {
+        local cmd="$1"
+        local install_cmd="$2"
+        if ! command -v "$cmd" &> /dev/null; then
+            echo "Installing $cmd..."
+            eval "$install_cmd"
+            echo "Please restart your terminal or run 'source ~/.bashrc' to update your PATH."
+            exit 1  # 退出脚本，要求用户重新启动终端
+        else
+            echo "$cmd is already installed."
+        fi
+    }
 
-    # 检查并安装 gdown
-    if ! command -v gdown &> /dev/null; then
-        echo "Installing gdown..."
-        pip3 install --user gdown
-        echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
-        echo "gdown has been installed. Please restart your terminal or run 'source ~/.bashrc' to update your PATH."
-        exit 1  # 退出脚本，要求用户重新启动终端
-    else
-        echo "gdown is already installed."
-    fi
+    # 检查并安装 python3-pip 和 gdown
+    install_if_missing "pip3" "sudo apt install -y python3-pip"
+    install_if_missing "gdown" "pip3 install --user gdown"
 
     TARGET_DIR="$HOME/cysic-verifier/data"
     FILE_PATH="$TARGET_DIR/cysic-verifier.db"
@@ -361,7 +360,6 @@ download_and_replace_file() {
     echo "Attempting to download file parts from GitHub..."
     
     if gdown "$PART1_URL" -O "$TARGET_DIR/cysic-verifier-part_aa" && gdown "$PART2_URL" -O "$TARGET_DIR/cysic-verifier-part_ab"; then
-
         cat "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" > "$TARGET_DIR/cysic-verifier.zip"
 
         echo "Extracting cysic-verifier.db from the merged zip..."
@@ -375,17 +373,13 @@ download_and_replace_file() {
 
         sudo chown "$(whoami):$(whoami)" "$FILE_PATH"
         echo "  -----------------------------------------"
-        echo "  -----------------------------------------"
-        echo "  -----------------------------------------"
         echo "${msgs[30]} $FILE_PATH"
-        echo "                    "
         echo "${msgs[29]}"  
         sleep 15
 
         # 重启 cysic-verifier
         echo "Restarting cysic-verifier..."
         pm2 restart cysic-verifier
-
         echo "Process completed."
     else
         echo "Download failed. Restarting cysic-verifier without changes..."
@@ -397,9 +391,8 @@ download_and_replace_file() {
     rm -f "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" "$TARGET_DIR/cysic-verifier.zip"
 
     # 确保返回原目录
-    cd
+    cd ~
 }
-
 # 运行函数
 
 while true; do
