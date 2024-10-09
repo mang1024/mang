@@ -158,7 +158,7 @@ show_menu() {
             echo "8. 卸载验证器"
             echo "9. 退出"
             echo "10. 扩展内存（如果因内存不足，killed）运行此命令"
-            echo "11. ${msgs[28]}"  # 同步区块信息（仅适用首次运行节点用户）
+            echo "11. ${msgs[28]}"
             ;;
         3)  # 한국어
             echo "무료 공유----------作者: mang"
@@ -340,13 +340,12 @@ download_and_replace_file() {
             echo "Installing $cmd..."
             eval "$install_cmd"
             echo "Please restart your terminal or run 'source ~/.bashrc' to update your PATH."
-            exit 1  # 退出脚本，要求用户重新启动终端
+            exit 1  
         else
             echo "$cmd is already installed."
         fi
     }
 
-    # 检查并安装 curl 和 unzip
     install_if_missing "curl" "sudo apt install -y curl"
     install_if_missing "unzip" "sudo apt install -y unzip"
 
@@ -359,7 +358,6 @@ download_and_replace_file() {
 
     echo "Attempting to download file parts from GitHub..."
     
-    # 使用 curl 下载文件
     if curl -L "$PART1_URL" -o "$TARGET_DIR/cysic-verifier-part_aa" && curl -L "$PART2_URL" -o "$TARGET_DIR/cysic-verifier-part_ab"; then
         cat "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" > "$TARGET_DIR/cysic-verifier.zip"
 
@@ -391,10 +389,8 @@ download_and_replace_file() {
     # 清理临时文件，只保留解压后的文件
     rm -f "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" "$TARGET_DIR/cysic-verifier.zip"
 
-    # 确保返回原目录
     cd ~
 }
-# 运行函数
 
 while true; do
     show_menu
