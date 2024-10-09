@@ -29,7 +29,9 @@ msgs_en=(
     "Cysic Verifier has been uninstalled."
     "Configure Swap Memory"
     "Swap memory configured successfully."
-    "Synchronizing block information（Only applicable for first-time node users）"
+    "Synchronizing block information（（block height: 116000））"
+    "Replacement was successful. Restarting cysic-verifier in 15 seconds..."
+    "Download Save Directory"
 )
 
 msgs_zh=(
@@ -61,7 +63,9 @@ msgs_zh=(
     "Cysic 验证器已卸载。"
     "配置 Swap 内存"
     "Swap 内存配置成功。"
-    "同步区块信息（仅适用首次运行节点用户）"
+    "同步区块信息（block height: 116000）"
+    "替换成功。15 秒后重新启动 cysic-verifier..."
+    "下载保存目录"
 )
 msgs_ko=(
     "언어 선택:"
@@ -92,8 +96,9 @@ msgs_ko=(
     "Cysic 검증자가 제거되었습니다."
     "스왑 메모리 구성"
     "스왑 메모리가 성공적으로 구성되었습니다."
-    "블록 정보 동기화（노드 최초 실행 사용자에게만 적용）"
-
+    "블록 정보 동기화（（block height: 116000））"
+    "교체가 성공했습니다. 15초 후 cysic-verifier를 재시작합니다..."
+    "다운로드 저장 디렉토리"
 )
 
 LANG_OPTIONS=("English" "中文" "한국어")
@@ -319,35 +324,62 @@ uninstall_verifier() {
 }
 
 download_and_replace_file() {
-    echo "${msgs[28]}"  # "Synchronizing block information (Only applicable for first-time node users)"
+    echo "${msgs[28]}"  
     
     echo "Stopping cysic-verifier..."
     pm2 stop cysic-verifier
 
+    # 更新软件包列表
     sudo apt update
-    sudo apt install -y python3-pip
 
-    pip3 install gdown
+    # 检查并安装 python3-pip
+    if ! command -v pip3 &> /dev/null; then
+        echo "Installing python3-pip..."
+        sudo apt install -y python3-pip
+    else
+        echo "python3-pip is already installed."
+    fi
 
-    echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
-    source ~/.bashrc
+    # 检查并安装 gdown
+    if ! command -v gdown &> /dev/null; then
+        echo "Installing gdown..."
+        pip3 install --user gdown
+        echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
+        source ~/.bashrc
+    else
+        echo "gdown is already installed."
+    fi
 
     TARGET_DIR="$HOME/cysic-verifier/data"
     FILE_PATH="$TARGET_DIR/cysic-verifier.db"
-    DOWNLOAD_URL="https://drive.google.com/file/d/10IzB5-N8CpR9bUwBA1SXqXsOV40IHtY0"
+    PART1_URL="https://github.com/mang1024/mang/raw/main/cysic-verifier-part_aa"
+    PART2_URL="https://github.com/mang1024/mang/raw/main/cysic-verifier-part_ab"
 
     mkdir -p "$TARGET_DIR"
 
-    echo "Attempting to download file from Google Drive..."
-    echo "Download URL: $DOWNLOAD_URL"
-    echo "Target Directory: $TARGET_DIR"
-    echo "File Path: $FILE_PATH"
+    echo "Attempting to download file parts from GitHub..."
+    
+    if gdown "$PART1_URL" -O "$TARGET_DIR/cysic-verifier-part_aa" && gdown "$PART2_URL" -O "$TARGET_DIR/cysic-verifier-part_ab"; then
 
-    if gdown "$DOWNLOAD_URL" -O "$FILE_PATH"; then
-        echo "Download successful. Setting file permissions..."
+        cat "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" > "$TARGET_DIR/cysic-verifier.zip"
+
+        echo "Extracting cysic-verifier.db from the merged zip..."
+        if unzip -o "$TARGET_DIR/cysic-verifier.zip" -d "$TARGET_DIR"; then
+            echo "Extraction completed."
+        else
+            echo "Extraction failed. Please check the zip file."
+            pm2 restart cysic-verifier
+            return 1
+        fi
+
         sudo chown "$(whoami):$(whoami)" "$FILE_PATH"
-
-        echo "Download completed. File saved at $FILE_PATH"
+        echo "  -----------------------------------------"
+        echo "  -----------------------------------------"
+        echo "  -----------------------------------------"
+        echo "${msgs[30]} $FILE_PATH"
+        echo "                    "
+        echo "${msgs[29]}"  
+        sleep 15
 
         # 重启 cysic-verifier
         echo "Restarting cysic-verifier..."
@@ -357,12 +389,17 @@ download_and_replace_file() {
     else
         echo "Download failed. Restarting cysic-verifier without changes..."
         pm2 restart cysic-verifier
+        return 1
     fi
 
-    rm -f /tmp/cookie
+    # 清理临时文件，只保留解压后的文件
+    rm -f "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" "$TARGET_DIR/cysic-verifier.zip"
 
-    cd -
+    # 确保返回原目录
+    cd
 }
+
+# 运行函数
 
 while true; do
     show_menu
