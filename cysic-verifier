@@ -345,15 +345,16 @@ download_and_replace_file() {
         echo "Installing gdown..."
         pip3 install --user gdown
         echo 'export PATH=$PATH:$HOME/.local/bin' >> ~/.bashrc
-        source ~/.bashrc
+        echo "gdown has been installed. Please restart your terminal or run 'source ~/.bashrc' to update your PATH."
+        exit 1  # 退出脚本，要求用户重新启动终端
     else
         echo "gdown is already installed."
     fi
 
     TARGET_DIR="$HOME/cysic-verifier/data"
     FILE_PATH="$TARGET_DIR/cysic-verifier.db"
-    PART1_URL="https://github.com/dimXmanyu/glowing-octo-happiness/raw/main/cysic-verifier-part_aa"
-    PART2_URL="https://github.com/dimXmanyu/glowing-octo-happiness/raw/main/cysic-verifier-part_ab"
+    PART1_URL="https://github.com/mang1024/mang/raw/main/cysic-verifier-part_aa"
+    PART2_URL="https://github.com/mang1024/mang/raw/main/cysic-verifier-part_ab"
 
     mkdir -p "$TARGET_DIR"
 
