@@ -78,6 +78,10 @@ show_status "检查 PM2 是否已安装..." "progress"
 if ! command -v pm2 &>/dev/null; then
     show_status "未找到 PM2，正在安装..." "progress"
     npm install -g pm2
+    if [ $? -ne 0 ]; then
+        show_status "PM2 安装失败，请检查 npm。" "error"
+        exit 1
+    fi
 else
     show_status "PM2 已安装。" "success"
 fi
