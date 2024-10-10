@@ -31,6 +31,19 @@ show_status() {
 # 定义服务名称
 SERVICE_NAME="nexus"
 
+# 安装 Homebrew（如果未安装）
+if ! command -v brew &> /dev/null; then
+    show_status "正在安装 Homebrew..." "progress"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+# 安装 PM2
+show_status "正在安装 PM2..." "progress"
+if ! npm install -g pm2; then
+    show_status "安装 PM2 失败。" "error"
+    exit 1
+fi
+
 # 安装 Rust
 show_status "正在安装 Rust..." "progress"
 if ! curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
@@ -41,12 +54,7 @@ fi
 # 加载 Rust 环境
 source $HOME/.cargo/env
 
-# 更新 Homebrew
-show_status "更新 Homebrew..." "progress"
-if ! brew update; then
-    show_status "更新 Homebrew 失败。" "error"
-    exit 1
-fi
+# 更新软件包列表（macOS 不需要这一步）
 
 # 检查并安装 Git
 if ! command -v git &> /dev/null; then
@@ -80,11 +88,22 @@ if ! brew install pkg-config openssl; then
     exit 1
 fi
 
-# 直接启动服务
-show_status "启动 Nexus 服务..." "progress"
-if ! "$HOME/.cargo/bin/cargo" run --release --bin prover -- beta.orchestrator.nexus.xyz; then
+# 直接启动服务（假设 PM2 已经安装）
+show_status "使用 PM2 启动 Nexus 服务..." "progress"
+if ! pm2 start "$HOME/.cargo/bin/cargo" --name "$SERVICE_NAME" -- run --release --bin prover -- beta.orchestrator.nexus.xyz 2>/dev/null; then
     show_status "启动服务失败。" "error"
     exit 1
+fi
+
+# 保存当前进程列表
+pm2 save 2>/dev/null
+
+# 改进的服务状态检查逻辑
+show_status "服务状态：" "progress"
+if pm2 isRunning "$SERVICE_NAME" 2>/dev/null; then
+    show_status "服务正在运行。" "success"
+else
+    show_status "获取服务状态失败。" "error"
 fi
 
 show_status "Nexus Prover 安装和服务设置完成！" "success"
