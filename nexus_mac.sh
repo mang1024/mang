@@ -50,6 +50,15 @@ else
     show_status "Git 已安装。" "success"
 fi
 
+# 检查 PM2 是否已安装
+show_status "检查 PM2 是否已安装..." "progress"
+if ! command -v pm2 &>/dev/null; then
+    show_status "未找到 PM2，正在安装..." "progress"
+    npm install -g pm2
+else
+    show_status "PM2 已安装。" "success"
+fi
+
 # 检查 Nexus 的 network-api 目录是否存在，存在则更新，不存在则克隆
 if [ -d "$NEXUS_HOME/network-api" ]; then
     show_status "$NEXUS_HOME/network-api 已存在，正在更新..." "progress"
@@ -67,7 +76,7 @@ if ! command -v cargo &>/dev/null; then
 fi
 
 # 进入 CLI 客户端并运行 prover 命令
-show_status "运行 prover 命令..." "progress"
-(cd $NEXUS_HOME/network-api/clients/cli && cargo run --release --bin prover -- beta.orchestrator.nexus.xyz)
+show_status "使用 PM2 启动 prover 命令..." "progress"
+pm2 start --name "nexus-prover" --interpreter "cargo" "$NEXUS_HOME/network-api/clients/cli/target/release/prover" -- beta.orchestrator.nexus.xyz
 
 show_status "Nexus Prover 启动完成！" "success"
