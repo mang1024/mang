@@ -40,15 +40,19 @@ show_status "检查 Node.js 和 npm 是否已安装..." "progress"
 if ! command -v node &>/dev/null; then
     show_status "未找到 Node.js，正在安装..." "progress"
     brew install node
-else
-    show_status "Node.js 已安装。" "success"
 fi
 
 if ! command -v npm &>/dev/null; then
     show_status "未找到 npm，正在安装..." "progress"
     brew install npm
+fi
+
+# 确保 Node.js 和 npm 安装成功
+if ! command -v node &>/dev/null || ! command -v npm &>/dev/null; then
+    show_status "Node.js 或 npm 安装失败，请检查安装。" "error"
+    exit 1
 else
-    show_status "npm 已安装。" "success"
+    show_status "Node.js 和 npm 已安装。" "success"
 fi
 
 # 检查 Rust 是否已安装，若未安装则安装并加载环境变量
@@ -104,6 +108,4 @@ fi
 
 # 进入 CLI 客户端并运行 prover 命令
 show_status "使用 PM2 启动 prover 命令..." "progress"
-pm2 start --name "nexus-prover" --interpreter "cargo" "$NEXUS_HOME/network-api/clients/cli/target/release/prover" -- beta.orchestrator.nexus.xyz
-
-show_status "Nexus Prover 启动完成！" "success"
+pm2 start --name "nexus-prover" --interpreter "cargo" "$NEXUS_HOME/network-api/clients/cli/target/release/prover" -- beta.or
