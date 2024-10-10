@@ -106,6 +106,8 @@ if ! command -v cargo &>/dev/null; then
     exit 1
 fi
 
-# 进入 CLI 客户端并运行 prover 命令
-show_status "使用 PM2 启动 prover 命令..." "progress"
-pm2 start --name "nexus-prover" --interpreter "cargo" "$NEXUS_HOME/network-api/clients/cli/target/release/prover" -- beta.or
+# 进入 CLI 客户端并构建项目
+show_status "进入 CLI 客户端并构建项目..." "progress"
+cd $NEXUS_HOME/network-api/clients/cli
+
+if [ ! -f Cargo.toml ]; then
