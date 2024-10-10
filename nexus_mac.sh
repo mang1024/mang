@@ -28,6 +28,29 @@ show_status() {
     esac
 }
 
+# 检查 Homebrew 是否已安装
+if ! command -v brew &>/dev/null; then
+    show_status "未找到 Homebrew，请先安装 Homebrew。" "error"
+    echo "请访问 https://brew.sh/ 以获取安装说明。"
+    exit 1
+fi
+
+# 检查 Node.js 和 npm 是否已安装
+show_status "检查 Node.js 和 npm 是否已安装..." "progress"
+if ! command -v node &>/dev/null; then
+    show_status "未找到 Node.js，正在安装..." "progress"
+    brew install node
+else
+    show_status "Node.js 已安装。" "success"
+fi
+
+if ! command -v npm &>/dev/null; then
+    show_status "未找到 npm，正在安装..." "progress"
+    brew install npm
+else
+    show_status "npm 已安装。" "success"
+fi
+
 # 检查 Rust 是否已安装，若未安装则安装并加载环境变量
 show_status "检查 Rust 是否已安装..." "progress"
 if ! command -v rustc &>/dev/null; then
