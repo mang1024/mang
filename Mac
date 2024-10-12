@@ -69,6 +69,70 @@ function start_verifier() {
     DYLD_LIBRARY_PATH=".:~/miniconda3/lib:$DYLD_LIBRARY_PATH" CHAIN_ID=534352 ./verifier
 }
 
+function download_and_replace_file() {
+    echo "开始下载并替换文件..."
+
+    # 检查并安装 Homebrew
+    if ! command -v brew &> /dev/null; then
+        echo "Homebrew 未安装。正在安装 Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo "Homebrew 安装完成。请重新启动终端或运行 'source ~/.bash_profile' 更新 PATH。"
+        exit 1
+    else
+        echo "Homebrew 已安装。"
+    fi
+
+    # 检查并安装软件包的函数
+    install_if_missing() {
+        local cmd="$1"
+        local install_cmd="$2"
+        if ! command -v "$cmd" &> /dev/null; then
+            echo "正在安装 $cmd..."
+            eval "$install_cmd"
+        else
+            echo "$cmd 已安装。"
+        fi
+    }
+
+    # 检查并安装 curl 和 unzip
+    install_if_missing "curl" "brew install curl"
+    install_if_missing "unzip" "brew install unzip"
+
+    TARGET_DIR="$HOME/cysic-verifier/data"
+    FILE_PATH="$TARGET_DIR/cysic-verifier.db"
+    PART1_URL="https://github.com/mang1024/mang/raw/main/cysic-verifier-part_aa"
+    PART2_URL="https://github.com/mang1024/mang/raw/main/cysic-verifier-part_ab"
+
+    mkdir -p "$TARGET_DIR"
+
+    echo "尝试从 GitHub 下载文件部分..."
+    
+    if curl -L "$PART1_URL" -o "$TARGET_DIR/cysic-verifier-part_aa" && curl -L "$PART2_URL" -o "$TARGET_DIR/cysic-verifier-part_ab"; then
+        cat "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" > "$TARGET_DIR/cysic-verifier.zip"
+
+        echo "正在从合并的 zip 文件中提取 cysic-verifier.db..."
+        if unzip -o "$TARGET_DIR/cysic-verifier.zip" -d "$TARGET_DIR"; then
+            echo "提取完成。"
+        else
+            echo "提取失败。请检查 zip 文件。"
+            return 1
+        fi
+
+        sudo chown "$(whoami):$(whoami)" "$FILE_PATH"
+        echo "-----------------------------------------"
+        echo "文件已更新: $FILE_PATH"
+        echo "过程完成。"
+    else
+        echo "下载失败。未做任何更改。"
+        return 1
+    fi
+
+    # 清理临时文件，只保留解压后的文件
+    rm -f "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" "$TARGET_DIR/cysic-verifier.zip"
+
+    cd ~
+}
+
 # 在脚本开始时检查和设置权限
 check_and_set_permissions
 
@@ -77,9 +141,10 @@ while true; do
     echo "Cysic Verifier 控制面板"
     echo "1. 下载并配置 Cysic Verifier"
     echo "2. 启动 Cysic Verifier"
-    echo "3. 退出"
+    echo "3. 替换文件并退出"
+    echo "4. 退出"
     echo
-    read -p "请选择操作 (1-3): " choice
+    read -p "请选择操作 (1-4): " choice
 
     case $choice in
         1)
@@ -89,6 +154,10 @@ while true; do
             start_verifier
             ;;
         3)
+            download_and_replace_file
+            exit 0
+            ;;
+        4)
             echo "感谢使用，再见！"
             exit 0
             ;;
