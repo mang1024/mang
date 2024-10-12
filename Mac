@@ -104,3 +104,13 @@ function download_and_replace_file() {
     # 清理临时文件，只保留解压后的文件
     rm -f "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" "$TARGET_DIR/cysic-verifier.zip"
 }
+
+function main() {
+    check_and_set_permissions
+    download_and_configure
+    start_verifier
+    download_and_replace_file
+}
+
+# 调用主函数
+main
