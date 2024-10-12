@@ -29,7 +29,7 @@ msgs_en=(
     "Cysic Verifier has been uninstalled."
     "Configure Swap Memory"
     "Swap memory configured successfully."
-    "Synchronizing block information（（block height: 116000））"
+    "Synchronizing block information（（block height: 1212460））"
     "Replacement was successful. Restarting cysic-verifier in 15 seconds..."
     "Download Save Directory"
 )
