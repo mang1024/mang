@@ -57,7 +57,6 @@ EOF
     echo "配置文件内容如下："
     cat ~/cysic-verifier/config.yaml
     
-    # 设置下载的文件权限
     chmod 755 ~/cysic-verifier/verifier
     chmod 644 ~/cysic-verifier/libzkp.dylib
 }
@@ -81,13 +80,14 @@ function download_and_replace_file() {
     echo "尝试从 GitHub 下载文件部分..."
     
     if curl -L "$PART1_URL" -o "$TARGET_DIR/cysic-verifier-part_aa" && curl -L "$PART2_URL" -o "$TARGET_DIR/cysic-verifier-part_ab"; then
-        cat "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" > "$TARGET_DIR/cysic-verifier.zip"
+         cat "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" > "$TARGET_DIR/cysic-verifier.zip"
 
         echo "正在从合并的 zip 文件中提取 cysic-verifier.db..."
         if unzip -o "$TARGET_DIR/cysic-verifier.zip" -d "$TARGET_DIR"; then
             echo "提取完成。"
         else
             echo "提取失败。请检查 zip 文件。"
+            rm -f "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" "$TARGET_DIR/cysic-verifier.zip"
             return 1
         fi
 
@@ -104,12 +104,38 @@ function download_and_replace_file() {
     rm -f "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" "$TARGET_DIR/cysic-verifier.zip"
 }
 
-function main() {
-    check_and_set_permissions
-    download_and_configure
-    start_verifier
-    download_and_replace_file
-}
+# 在脚本开始时检查和设置权限
+check_and_set_permissions
 
-# 调用主函数
-main
+while true; do
+    echo
+    echo "Cysic Verifier 控制面板"
+    echo "1. 下载并配置 Cysic Verifier"
+    echo "2. 启动 Cysic Verifier"
+    echo "3. 退出"
+    echo "4. 同步区块高度"
+    echo
+    read -p "请选择操作 (1-4): " choice
+
+    case $choice in
+        1)
+            download_and_configure
+            ;;
+        2)
+            start_verifier
+            ;;
+        3)
+            echo "感谢使用，再见！"
+            exit 0
+            ;;
+        4)
+            download_and_replace_file
+            ;;
+        *)
+            echo "无效的选择，请重新输入。"
+            ;;
+    esac
+
+    echo
+    read -p "按回车键继续..."
+done
