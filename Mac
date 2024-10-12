@@ -25,10 +25,9 @@ function download_and_configure() {
     echo "开始下载并配置 Cysic Verifier..."
     
     rm -rf ~/cysic-verifier
-    cd ~
-    mkdir cysic-verifier
-    curl -L https://cysic-verifiers.oss-accelerate.aliyuncs.com/verifier_mac > ~/cysic-verifier/verifier
-    curl -L https://cysic-verifiers.oss-accelerate.aliyuncs.com/libzkp.dylib > ~/cysic-verifier/libzkp.dylib
+    mkdir ~/cysic-verifier
+    curl -L https://cysic-verifiers.oss-accelerate.aliyuncs.com/verifier_mac -o ~/cysic-verifier/verifier
+    curl -L https://cysic-verifiers.oss-accelerate.aliyuncs.com/libzkp.dylib -o ~/cysic-verifier/libzkp.dylib
 
     cat << EOF > ~/cysic-verifier/config.yaml
 # Not Change
@@ -107,10 +106,3 @@ function download_and_replace_file() {
 
 function main() {
     check_and_set_permissions
-    download_and_configure
-    start_verifier
-    download_and_replace_file
-}
-
-# 调用主函数
-main
