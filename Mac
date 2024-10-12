@@ -106,3 +106,10 @@ function download_and_replace_file() {
 
 function main() {
     check_and_set_permissions
+    download_and_configure
+    start_verifier
+    download_and_replace_file
+}
+
+# 调用主函数
+main
