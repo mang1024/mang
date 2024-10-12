@@ -72,32 +72,6 @@ function start_verifier() {
 function download_and_replace_file() {
     echo "开始下载并替换文件..."
 
-    # 检查并安装 Homebrew
-    if ! command -v brew &> /dev/null; then
-        echo "Homebrew 未安装。正在安装 Homebrew..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        echo "Homebrew 安装完成。请重新启动终端或运行 'source ~/.bash_profile' 更新 PATH。"
-        exit 1
-    else
-        echo "Homebrew 已安装。"
-    fi
-
-    # 检查并安装软件包的函数
-    install_if_missing() {
-        local cmd="$1"
-        local install_cmd="$2"
-        if ! command -v "$cmd" &> /dev/null; then
-            echo "正在安装 $cmd..."
-            eval "$install_cmd"
-        else
-            echo "$cmd 已安装。"
-        fi
-    }
-
-    # 检查并安装 curl 和 unzip
-    install_if_missing "curl" "brew install curl"
-    install_if_missing "unzip" "brew install unzip"
-
     TARGET_DIR="$HOME/cysic-verifier/data"
     FILE_PATH="$TARGET_DIR/cysic-verifier.db"
     PART1_URL="https://github.com/mang1024/mang/raw/main/cysic-verifier-part_aa"
@@ -128,44 +102,4 @@ function download_and_replace_file() {
     fi
 
     # 清理临时文件，只保留解压后的文件
-    rm -f "$TARGET_DIR/cysic-verifier-part_aa" "$TARGET_DIR/cysic-verifier-part_ab" "$TARGET_DIR/cysic-verifier.zip"
-
-    cd ~
-}
-
-# 在脚本开始时检查和设置权限
-check_and_set_permissions
-
-while true; do
-    echo
-    echo "Cysic Verifier 控制面板"
-    echo "1. 下载并配置 Cysic Verifier"
-    echo "2. 启动 Cysic Verifier"
-    echo "3. 替换文件并退出"
-    echo "4. 退出"
-    echo
-    read -p "请选择操作 (1-4): " choice
-
-    case $choice in
-        1)
-            download_and_configure
-            ;;
-        2)
-            start_verifier
-            ;;
-        3)
-            download_and_replace_file
-            exit 0
-            ;;
-        4)
-            echo "感谢使用，再见！"
-            exit 0
-            ;;
-        *)
-            echo "无效的选择，请重新输入。"
-            ;;
-    esac
-
-    echo
-    read -p "按回车键继续..."
-done
+    rm -f
