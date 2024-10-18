@@ -82,9 +82,28 @@ function change_twitter_config {
 
 function start_make_with_pm2 {
   echo "使用 PM2 启动 Makefile..."
+  
   local current_dir=$(pwd)
-  pm2 start --name masa-oracle-make --interpreter bash -c "make run" --cwd "$current_dir/contracts"
-  echo "Makefile 已通过 PM2 启动。"
+  local contracts_dir="$current_dir/contracts"
+
+  # 检查 contracts 目录是否存在
+  if [ ! -d "$contracts_dir" ]; then
+    echo "错误: 目录 $contracts_dir 不存在。"
+    return 1
+  fi
+
+  # 启动 PM2
+  pm2 start --name masa-oracle-make --interpreter bash -c "make run" --cwd "$contracts_dir"
+  
+  if [ $? -eq 0 ]; then
+    echo "Makefile 已通过 PM2 启动。"
+  else
+    echo "错误: PM2 启动失败。"
+    return 1
+  fi
+
+  # 显示 PM2 日志
+  pm2 logs masa-oracle-make
 }
 
 function main_menu {
