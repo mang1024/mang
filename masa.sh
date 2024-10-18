@@ -62,4 +62,19 @@ if ! git clone https://github.com/masa-finance/masa-oracle.git; then
   exit 1
 fi
 
+# 进入仓库目录并执行命令
+echo "进入仓库目录并安装依赖..."
+cd masa-oracle/contracts
+if ! npm install; then
+  echo "安装 npm 依赖失败，退出安装。"
+  exit 1
+fi
+
+# 返回上级目录并构建项目
+cd ..
+if ! make build; then
+  echo "构建项目失败，退出安装。"
+  exit 1
+fi
+
 echo "基础配置环境安装完成！"
