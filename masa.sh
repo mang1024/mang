@@ -19,10 +19,10 @@ function install_base_environment {
   echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
   source ~/.bashrc
 
-  # 安装 npm
+  # 安装 Node.js
   echo "正在安装 Node.js..."
   if ! curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -; then
-    echo "添加 NodeSource 仓库失败，尝试其他方法..."
+    echo "添加 NodeSource 仓库失败，尝试 Node.js 16.x..."
     sudo apt update
     if ! curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -; then
       echo "添加 NodeSource 仓库 (Node.js 16.x) 失败，退出安装。"
@@ -37,15 +37,6 @@ function install_base_environment {
 
   node -v
   npm -v
-
-  # 安装 PM2
-  echo "正在安装 PM2..."
-  if ! npm install -g pm2; then
-    echo "安装 PM2 失败，退出安装。"
-    return 1
-  fi
-
-  pm2 -v
 
   # 克隆仓库
   git clone https://github.com/masa-finance/masa-oracle.git
@@ -71,25 +62,6 @@ TWITTER_ACCOUNTS=masabigbigbig:masabigbigbig0825
 USER_AGENTS="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36,Mozilla/5.0 (Macintosh; Intel Mac OS X 14.7; rv:131.0) Gecko/20100101 Firefox/131.0"
 EOL
 
-  # 创建 ecosystem.config.js 文件
-  cat <<EOL > ecosystem.config.js
-module.exports = {
-  apps: [
-    {
-      name: "masa-oracle-make", // 应用名称
-      script: "make", // 要执行的命令
-      args: "run", // 传递给命令的参数
-      cwd: "$PWD/contracts", // 修改为指向 contracts 目录
-      interpreter: "bash", // 使用的解释器
-      watch: true, // 启用监视
-      env: {
-        NODE_ENV: "production", // 设置环境变量
-      },
-    },
-  ],
-};
-EOL
-
   echo "基础配置环境安装完成！"
 }
 
@@ -99,49 +71,28 @@ function change_twitter_config {
   echo ".env 文件中的 Twitter 配置已更新！"
 }
 
-function start_make_with_pm2 {
-  echo "使用 PM2 启动 Makefile..."
-  
-  local current_dir=$(pwd)
-  local masa_oracle_dir="$current_dir/masa-oracle"
+function start_make {
+  echo "使用 Makefile 启动应用..."
 
+  local masa_oracle_dir="$(pwd)/masa-oracle"
+  
   # 检查 masa-oracle 目录是否存在
   if [ ! -d "$masa_oracle_dir" ]; then
     echo "错误: 目录 $masa_oracle_dir 不存在。"
     return 1
   fi
+  
+  # 进入 masa-oracle 目录并执行 Makefile
+  cd "$masa_oracle_dir/contracts" || { echo "切换到 contracts 目录失败"; exit 1; }
 
-  # 创建 ecosystem.config.js 文件
-  cat <<EOL > ecosystem.config.js
-module.exports = {
-  apps: [
-    {
-      name: "masa-oracle-make", // 应用名称
-      script: "make", // 要执行的命令
-      args: "run", // 传递给命令的参数
-      cwd: "$masa_oracle_dir/contracts", // 修改为指向 contracts 目录
-      interpreter: "bash", // 使用的解释器
-      watch: true, // 启用监视
-      env: {
-        NODE_ENV: "production", // 设置环境变量
-      },
-    },
-  ],
-};
-EOL
-
-  # 启动 PM2
-  pm2 start ecosystem.config.js
+  # 使用 screen 启动 Makefile
+  screen -S masa_oracle_session -d -m make run
   
   if [ $? -eq 0 ]; then
-    echo "Makefile 已通过 PM2 启动。"
+    echo "Makefile 已成功执行。"
   else
-    echo "错误: PM2 启动失败。"
-    return 1
+    echo "错误: Makefile 执行失败。"
   fi
-  
-  # 显示 PM2 日志
-  pm2 logs masa-oracle-make
 }
 
 function main_menu {
@@ -160,14 +111,14 @@ function main_menu {
         change_twitter_config
         ;;
       3)
-        start_make_with_pm2
+        start_make        
         ;;
       4)
-        echo "退出程序..."
+        echo "退出程序。"
         exit 0
         ;;
       *)
-        echo "无效的选择，请重试"
+        echo "无效的选择，请重新输入。"
         ;;
     esac
   done
