@@ -2,7 +2,7 @@
 
 # 下载 Go
 echo "正在下载 Go..."
-wget -q https://go.dev/dl/go1.22.8.linux-amd64.tar.gz
+curl -LO https://go.dev/dl/go1.22.8.linux-amd64.tar.gz
 
 # 解压
 echo "正在解压 Go..."
@@ -12,6 +12,14 @@ sudo tar -C /usr/local -xzf go1.22.8.linux-amd64.tar.gz
 echo "配置 Go 环境变量..."
 echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
 source ~/.bashrc
+
+# 检查 Go 是否安装成功
+if ! command -v go &> /dev/null; then
+  echo "Go 安装失败，退出安装。"
+  exit 1
+else
+  echo "Go 安装成功，版本为：$(go version)"
+fi
 
 # 安装 Node.js
 echo "正在安装 Node.js..."
