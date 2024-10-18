@@ -19,8 +19,8 @@ function install_base_environment {
   echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
   source ~/.bashrc
 
-  # 安装 npm 和 pm2
-  echo "正在安装 Node.js 和 PM2..."
+  # 安装 npm
+  echo "正在安装 Node.js..."
   if ! curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -; then
     echo "添加 NodeSource 仓库失败，尝试其他方法..."
     sudo apt update
@@ -37,16 +37,6 @@ function install_base_environment {
 
   node -v
   npm -v
-
-  if ! sudo npm install pm2 -g; then
-    echo "使用 npm 安装 PM2 失败，尝试其他方法..."
-    if ! sudo apt install -y npm && sudo npm install pm2 -g; then
-      echo "安装 PM2 失败，退出安装。"
-      return 1
-    fi
-  fi
-
-  pm2 -v
 
   # 克隆仓库
   git clone https://github.com/masa-finance/masa-oracle.git
@@ -81,35 +71,10 @@ function change_twitter_config {
   echo ".env 文件中的 Twitter 配置已更新！"
 }
 
-function build_environment {
-  echo "开始构建环境..."
-  # 回到用户的初始存储位置
-  cd ~ || { echo "切换到初始目录失败"; exit 1; }
-  cd masa-oracle || { echo "切换到 masa-oracle 目录失败"; exit 1; }
-  make build
-  echo "环境构建完成！"
-}
-
-function start_node {
-  echo "启动节点..."
-  # 回到用户的初始存储位置
-  cd ~ || { echo "切换到初始目录失败"; exit 1; }
-  cd masa-oracle/contracts || { echo "切换到 masa-oracle/contracts 目录失败"; exit 1; }
-
-}
-
-function get_and_stake_tokens {
-  cd ~ || { echo "切换到初始目录失败"; exit 1; }
-  echo "获取 MASA 代币并质押..."
-  make faucet 
-  echo "注意：请先领取代币，完成后再运行质押命令。"
-  make stake
-}
-
 function main_menu {
   while true; do
     # 主菜单
-    echo -e "\n1. 安装基础配置环境\n2. 更改 Twitter 配置\n3. 开始构建环境\n4. 启动节点\n5. 获取 MASA 代币并质押\n6. 退出"
+    echo -e "\n1. 安装基础配置环境\n2. 更改 Twitter 配置\n3. 退出"
 
     read -p "请选择操作: " choice
 
@@ -122,16 +87,6 @@ function main_menu {
         change_twitter_config
         ;;
       3)
-        build_environment
-        ;;
-      4)
-        start_node
-        exit 0  # 启动节点后退出程序
-        ;;
-      5)
-        get_and_stake_tokens
-        ;;
-      6)
         echo "退出程序..."
         exit 0
         ;;
