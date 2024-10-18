@@ -19,13 +19,38 @@ function install_base_environment {
   echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
   source ~/.bashrc
 
-  # 安装 npm
-  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-  sudo apt-get install -y nodejs
+  # 安装 npm 和 pm2
+  echo "正在安装 Node.js 和 PM2..."
+  if ! curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -; then
+    echo "添加 NodeSource 仓库失败，尝试其他方法..."
+    sudo apt update
+    if ! curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -; then
+      echo "添加 NodeSource 仓库 (Node.js 16.x) 失败，退出安装。"
+      return 1
+    fi
+  fi
+
+  if ! sudo apt-get install -y nodejs; then
+    echo "安装 Node.js 失败，退出安装。"
+    return 1
+  fi
+
+  node -v
+  npm -v
+
+  if ! sudo npm install pm2 -g; then
+    echo "使用 npm 安装 PM2 失败，尝试其他方法..."
+    if ! sudo apt install -y npm && sudo npm install pm2 -g; then
+      echo "安装 PM2 失败，退出安装。"
+      return 1
+    fi
+  fi
+
+  pm2 -v
 
   # 克隆仓库
   git clone https://github.com/masa-finance/masa-oracle.git
-  cd masa-oracle || { echo "切换目录失败"; exit 1; }
+  cd masa-oracle || { echo "切换到 masa-oracle 目录失败"; exit 1; }
   
   # 进入 contracts 目录
   cd contracts || { echo "切换到 contracts 目录失败"; exit 1; }
@@ -58,19 +83,25 @@ function change_twitter_config {
 
 function build_environment {
   echo "开始构建环境..."
-  cd masa-oracle
+  # 回到用户的初始存储位置
+  cd ~ || { echo "切换到初始目录失败"; exit 1; }
+  cd masa-oracle || { echo "切换到 masa-oracle 目录失败"; exit 1; }
   make build
+  echo "环境构建完成！"
 }
 
 function start_node {
   echo "启动节点..."
-cd masa-oracle
-make run
-  # 注意：这里不再返回主菜单
+  # 回到用户的初始存储位置
+  cd ~ || { echo "切换到初始目录失败"; exit 1; }
+  cd masa-oracle/contracts || { echo "切换到 masa-oracle/contracts 目录失败"; exit 1; }
+  pm2 start make --name "masa-oracle" -- run
+  pm2 save
+  echo "节点已使用 PM2 启动"
 }
 
 function get_and_stake_tokens {
-  cd masa-oracle || { echo "切换目录失败"; exit 1; }
+  cd ~ || { echo "切换到初始目录失败"; exit 1; }
   echo "获取 MASA 代币并质押..."
   make faucet 
   echo "注意：请先领取代币，完成后再运行质押命令。"
@@ -97,6 +128,7 @@ function main_menu {
         ;;
       4)
         start_node
+        exit 0  # 启动节点后退出程序
         ;;
       5)
         get_and_stake_tokens
