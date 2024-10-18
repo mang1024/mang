@@ -55,7 +55,7 @@ function install_base_environment {
   cd contracts || { echo "切换到 contracts 目录失败"; exit 1; }
 
   # 安装依赖
-  npm install
+  npm install || { echo "安装依赖失败"; exit 1; }
   cd ../..  # 返回到 masa-oracle 目录
 
   # 新建一个配置文件
@@ -110,7 +110,8 @@ function start_make_with_pm2 {
     echo "错误: 目录 $masa_oracle_dir 不存在。"
     return 1
   fi
-    # 创建 ecosystem.config.js 文件
+
+  # 创建 ecosystem.config.js 文件
   cat <<EOL > ecosystem.config.js
 module.exports = {
   apps: [
