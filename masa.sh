@@ -58,8 +58,8 @@ function install_base_environment {
   npm install
   cd ../..  # 返回到 masa-oracle 目录
 
-  # 新建一个配置文件
-  cat <<EOL > .env
+# 新建一个配置文件
+cat <<EOL > .env
 # Default .env configuration
 RPC_URL=https://ethereum-sepolia.publicnode.com
 ENV=test
@@ -69,6 +69,25 @@ PORT=8080
 TWITTER_SCRAPER=true
 TWITTER_ACCOUNTS=masabigbigbig:masabigbigbig0825
 USER_AGENTS="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36,Mozilla/5.0 (Macintosh; Intel Mac OS X 14.7; rv:131.0) Gecko/20100101 Firefox/131.0"
+EOL
+
+# 创建 ecosystem.config.js 文件
+cat <<EOL > ecosystem.config.js
+module.exports = {
+  apps: [
+    {
+      name: "masa-oracle-make", // 应用名称
+      script: "make", // 要执行的命令
+      args: "run", // 传递给命令的参数
+      cwd: "$contracts_dir", // 工作目录
+      interpreter: "bash", // 使用的解释器
+      watch: true, // 启用监视
+      env: {
+        NODE_ENV: "production", // 设置环境变量
+      },
+    },
+  ],
+};
 EOL
 
   echo "基础配置环境安装完成！"
@@ -92,8 +111,27 @@ function start_make_with_pm2 {
     return 1
   fi
 
+  # 创建 ecosystem.config.js 文件
+  cat <<EOL > ecosystem.config.js
+module.exports = {
+  apps: [
+    {
+      name: "masa-oracle-make", // 应用名称
+      script: "make", // 要执行的命令
+      args: "run", // 传递给命令的参数
+      cwd: "$contracts_dir", // 工作目录
+      interpreter: "bash", // 使用的解释器
+      watch: true, // 启用监视
+      env: {
+        NODE_ENV: "production", // 设置环境变量
+      },
+    },
+  ],
+};
+EOL
+
   # 启动 PM2
-  pm2 start --name masa-oracle-make --interpreter bash -c "make run" --cwd "$contracts_dir"
+  pm2 start ecosystem.config.js
   
   if [ $? -eq 0 ]; then
     echo "Makefile 已通过 PM2 启动。"
