@@ -55,4 +55,11 @@ TWITTER_ACCOUNTS=masabigbigbig:masabigbigbig0825
 USER_AGENTS="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36,Mozilla/5.0 (Macintosh; Intel Mac OS X 14.7; rv:131.0) Gecko/20100101 Firefox/131.0"
 EOL
 
+# 克隆 GitHub 仓库
+echo "正在克隆 GitHub 仓库..."
+if ! git clone https://github.com/masa-finance/masa-oracle.git; then
+  echo "克隆仓库失败，退出安装。"
+  exit 1
+fi
+
 echo "基础配置环境安装完成！"
