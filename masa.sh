@@ -90,12 +90,20 @@ function start_make {
   
   if [ $? -eq 0 ]; then
     echo "Makefile 已成功执行。"
-    echo "按任意键继续..."
-    read -n 1 -s  # 等待用户输入
+    echo "要查看运行的进程，请使用命令: screen -r masa_oracle_session"
+    echo "要退出当前会话，请使用 Ctrl+C 或关闭终端。"
   else
     echo "错误: Makefile 执行失败。"
   fi
+  
+  # 保持在当前界面，不返回主菜单
+  while true; do
+    sleep 1  # 无限循环，保持程序运行
+  done
 }
+
+# 调用 start_make 函数
+start_make
 
 function main_menu {
   while true; do
