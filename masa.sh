@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# 检查是否以 root 用户运行
-function check_root {
-  if [ "$EUID" -ne 0 ]; then
-    echo "请以 root 用户运行此操作"
-    exit 1
-  fi
-}
-
 while true; do
   # 主菜单
   echo -e "\n1. 安装基础配置环境\n2. 更改 Twitter 配置\n3. 开始构建环境\n4. 启动节点\n5. 获取 MASA 代币并质押\n6. 显示私钥\n7. 退出"
@@ -16,7 +8,6 @@ while true; do
 
   case $choice in
     1)
-      check_root  # 仅在命令1时检查root权限
       echo "正在安装基础配置环境..."
       
       # 下载 Go
