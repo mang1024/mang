@@ -92,6 +92,7 @@ EOL
 
     6)
       echo "显示私钥..."
+      # 确保显示当前用户的私钥
       cat ~/.masa/masa_oracle_key.ecdsa
       ;;
 
