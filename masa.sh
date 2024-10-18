@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e  # 发生错误时退出
+trap 'echo "脚本被中断"; exit 1;' SIGINT
+
 # 检查是否以 root 用户运行
 function check_root {
   if [ "$EUID" -ne 0 ]; then
@@ -12,7 +15,7 @@ function install_base_environment {
   echo "正在安装基础配置环境..."
   
   # 下载 Go
-  wget https://go.dev/dl/go1.22.8.linux-amd64.tar.gz
+  wget -q https://go.dev/dl/go1.22.8.linux-amd64.tar.gz
   # 解压
   sudo tar -C /usr/local -xzf go1.22.8.linux-amd64.tar.gz
   # 配置环境
@@ -72,38 +75,18 @@ function change_twitter_config {
 }
 
 function start_make {
-  echo "使用 Makefile 启动应用..."
-
-  local masa_oracle_dir="$(pwd)/masa-oracle"
-  
-  # 检查 masa-oracle 目录是否存在
-  if [ ! -d "$masa_oracle_dir" ]; then
-    echo "错误: 目录 $masa_oracle_dir 不存在。"
-    return 1
-  fi
-  
-  # 进入 masa-oracle 目录并执行 Makefile
-  cd "$masa_oracle_dir/contracts" || { echo "切换到 contracts 目录失败"; exit 1; }
-
-  # 使用 screen 启动 Makefile
-  screen -S masa_oracle_session -d -m make run
-  
-  if [ $? -eq 0 ]; then
-    echo "Makefile 已成功执行。"
-    echo "要查看运行的进程，请使用命令: screen -r masa_oracle_session"
-    echo "要退出当前会话，请使用 Ctrl+C 或关闭终端。"
-  else
-    echo "错误: Makefile 执行失败。"
-  fi
-  
-  # 保持在当前界面，不返回主菜单
-  while true; do
-    sleep 1  # 无限循环，保持程序运行
-  done
+  echo "正在构建项目..."
+  cd masa-oracle || { echo "切换到 masa-oracle 目录失败"; exit 1; }
+  make build
+  echo "构建完成！"
 }
 
-# 调用 start_make 函数
-start_make
+function run_make {
+  echo "正在启动程序..."
+  cd masa-oracle || { echo "切换到 masa-oracle 目录失败"; exit 1; }
+  screen -S masa -dm make run
+  echo "程序已在后台运行，您可以使用 'screen -r masa' 来重新连接。"
+}
 
 function main_menu {
   while true; do
@@ -122,13 +105,14 @@ function main_menu {
         ;;
       3)
         start_make
+        run_make
         ;;
       4)
         echo "退出程序。"
         exit 0
         ;;
       *)
-        echo "无效的选择，请重新输入。"
+        echo "无效的选择，请重试。"
         ;;
     esac
   done
