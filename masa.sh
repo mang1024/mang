@@ -79,7 +79,7 @@ module.exports = {
       name: "masa-oracle-make", // 应用名称
       script: "make", // 要执行的命令
       args: "run", // 传递给命令的参数
-      cwd: "$contracts_dir", // 工作目录
+      cwd: "$masa_oracle_dir", // 工作目录
       interpreter: "bash", // 使用的解释器
       watch: true, // 启用监视
       env: {
@@ -103,11 +103,11 @@ function start_make_with_pm2 {
   echo "使用 PM2 启动 Makefile..."
   
   local current_dir=$(pwd)
-  local contracts_dir="$current_dir/contracts"
+  local masa-oracle_dir="$current_dir/masa-oracle"
 
-  # 检查 contracts 目录是否存在
-  if [ ! -d "$contracts_dir" ]; then
-    echo "错误: 目录 $contracts_dir 不存在。"
+  # 检查 masa-oracle 目录是否存在
+  if [ ! -d "$masa-oracle_dir" ]; then
+    echo "错误: 目录 $masa-oracle_dir 不存在。"
     return 1
   fi
 
@@ -119,7 +119,7 @@ module.exports = {
       name: "masa-oracle-make", // 应用名称
       script: "make", // 要执行的命令
       args: "run", // 传递给命令的参数
-      cwd: "$contracts_dir", // 工作目录
+      cwd: "$masa-oracle_dir", // 工作目录
       interpreter: "bash", // 使用的解释器
       watch: true, // 启用监视
       env: {
