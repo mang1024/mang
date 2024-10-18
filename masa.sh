@@ -90,6 +90,8 @@ function start_make {
   
   if [ $? -eq 0 ]; then
     echo "Makefile 已成功执行。"
+    echo "按任意键继续..."
+    read -n 1 -s  # 等待用户输入
   else
     echo "错误: Makefile 执行失败。"
   fi
@@ -111,7 +113,7 @@ function main_menu {
         change_twitter_config
         ;;
       3)
-        start_make        
+        start_make
         ;;
       4)
         echo "退出程序。"
