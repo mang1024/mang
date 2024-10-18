@@ -58,14 +58,14 @@ function change_twitter_config {
 
 function build_environment {
   echo "开始构建环境..."
-  cd masa-oracle || { echo "切换到 contracts 目录失败"; exit 1; }
+  cd masa-oracle
   make build
 }
 
 function start_node {
   echo "启动节点..."
-  cd masa-oracle || { echo "切换到 contracts 目录失败"; exit 1; }
-  make run
+cd masa-oracle
+make run
   # 注意：这里不再返回主菜单
 }
 
