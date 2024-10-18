@@ -28,19 +28,8 @@ while true; do
       source ~/.bashrc
 
       # 安装 npm
-      if ! curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -; then
-          echo "无法添加 NodeSource 仓库，尝试其他方法..."
-          sudo apt update
-          if ! curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -; then
-              echo "无法添加 NodeSource 仓库，退出。"
-              exit 1
-          fi
-      fi
-
-      if ! sudo apt-get install -y nodejs; then
-          echo "安装 Node.js 失败，退出。"
-          exit 1
-      fi
+      curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+      sudo apt-get install -y nodejs
 
       # 克隆仓库
       git clone https://github.com/masa-finance/masa-oracle.git
