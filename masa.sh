@@ -38,6 +38,15 @@ function install_base_environment {
   node -v
   npm -v
 
+  # 安装 PM2
+  echo "正在安装 PM2..."
+  if ! npm install -g pm2; then
+    echo "安装 PM2 失败，退出安装。"
+    return 1
+  fi
+
+  pm2 -v
+
   # 克隆仓库
   git clone https://github.com/masa-finance/masa-oracle.git
   cd masa-oracle || { echo "切换到 masa-oracle 目录失败"; exit 1; }
@@ -71,10 +80,17 @@ function change_twitter_config {
   echo ".env 文件中的 Twitter 配置已更新！"
 }
 
+function start_make_with_pm2 {
+  echo "使用 PM2 启动 Makefile..."
+  local current_dir=$(pwd)
+  pm2 start --name masa-oracle-make --interpreter bash -c "make run" --cwd "$current_dir/contracts"
+  echo "Makefile 已通过 PM2 启动。"
+}
+
 function main_menu {
   while true; do
     # 主菜单
-    echo -e "\n1. 安装基础配置环境\n2. 更改 Twitter 配置\n3. 退出"
+    echo -e "\n1. 安装基础配置环境\n2. 更改 Twitter 配置\n3. 启动 Makefile\n4. 退出"
 
     read -p "请选择操作: " choice
 
@@ -87,15 +103,18 @@ function main_menu {
         change_twitter_config
         ;;
       3)
+        start_make_with_pm2
+        ;;
+      4)
         echo "退出程序..."
         exit 0
         ;;
       *)
-        echo "无效的选择，请重试。"
+        echo "无效的选择，请重试"
         ;;
     esac
   done
 }
 
-# 运行主菜单
+# 调用主菜单
 main_menu
