@@ -58,11 +58,13 @@ function change_twitter_config {
 
 function build_environment {
   echo "开始构建环境..."
+  cd contracts
   make build
 }
 
 function start_node {
   echo "启动节点..."
+  cd contracts
   make run
 }
 
