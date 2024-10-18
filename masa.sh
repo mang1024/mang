@@ -74,16 +74,10 @@ function get_and_stake_tokens {
   make stake
 }
 
-function show_private_key {
-  echo "显示私钥..."
-  # 确保显示当前用户的私钥
-  cat ~/.masa/masa_oracle_key.ecdsa
-}
-
 function main_menu {
   while true; do
     # 主菜单
-    echo -e "\n1. 安装基础配置环境\n2. 更改 Twitter 配置\n3. 开始构建环境\n4. 启动节点\n5. 获取 MASA 代币并质押\n6. 显示私钥\n7. 退出"
+    echo -e "\n1. 安装基础配置环境\n2. 更改 Twitter 配置\n3. 开始构建环境\n4. 启动节点\n5. 获取 MASA 代币并质押\n6. 退出"
 
     read -p "请选择操作: " choice
 
@@ -105,9 +99,6 @@ function main_menu {
         get_and_stake_tokens
         ;;
       6)
-        show_private_key
-        ;;
-      7)
         echo "退出程序..."
         exit 0
         ;;
