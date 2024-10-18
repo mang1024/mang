@@ -110,8 +110,7 @@ function start_make_with_pm2 {
     echo "错误: 目录 $masa_oracle_dir 不存在。"
     return 1
   fi
-
-  # 创建 ecosystem.config.js 文件
+    # 创建 ecosystem.config.js 文件
   cat <<EOL > ecosystem.config.js
 module.exports = {
   apps: [
@@ -139,7 +138,7 @@ EOL
     echo "错误: PM2 启动失败。"
     return 1
   fi
-
+  
   # 显示 PM2 日志
   pm2 logs masa-oracle-make
 }
