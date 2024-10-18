@@ -91,7 +91,11 @@ function run_make {
 function main_menu {
   while true; do
     # 主菜单
-    echo -e "\n1. 安装基础配置环境\n2. 更改 Twitter 配置\n3. 启动 Makefile\n4. 退出"
+    echo -e "\n1. 安装基础配置环境"
+    echo "2. 修改 Twitter 配置"
+    echo "3. 开始构建"
+    echo "4. 运行"
+    echo "5. 退出"
 
     read -p "请选择操作: " choice
 
@@ -105,9 +109,11 @@ function main_menu {
         ;;
       3)
         start_make
-        run_make
         ;;
       4)
+        run_make
+        ;;
+      5)
         echo "退出程序。"
         exit 0
         ;;
