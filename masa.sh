@@ -95,9 +95,7 @@ function start_node {
   # 回到用户的初始存储位置
   cd ~ || { echo "切换到初始目录失败"; exit 1; }
   cd masa-oracle/contracts || { echo "切换到 masa-oracle/contracts 目录失败"; exit 1; }
-  pm2 start make --name "masa-oracle" -- run
-  pm2 save
-  echo "节点已使用 PM2 启动"
+
 }
 
 function get_and_stake_tokens {
