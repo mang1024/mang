@@ -78,7 +78,6 @@ clone_repository() {
     cd masa-oracle || { echo "克隆失败，目录不存在！"; return; }
 
     echo "安装项目依赖..."
-    cd
     cd contracts
     npm install
     cd ..
