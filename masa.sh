@@ -165,6 +165,19 @@ stake_tokens() {
     fi
 }
 
+# 使用 PM2 启动项目
+start_with_pm2() {
+    echo "正在使用 PM2 启动项目..."
+    cd ~/masa-oracle || { echo "目录 masa-oracle 不存在！"; return; }
+    
+    pm2 start make --name masa -- run
+    if [ $? -eq 0 ]; then
+        echo "项目启动成功！"
+    else
+        echo "项目启动失败！"
+    fi
+}
+
 # 主菜单
 main_menu() {
     while true; do
@@ -175,6 +188,7 @@ main_menu() {
         echo "4) 显示私钥"
         echo "5) 领币质押"
         echo "0) 退出"
+        echo "6) 使用 PM2 启动项目"  
         read -p "请输入选项: " option
 
         case $option in
@@ -189,6 +203,7 @@ main_menu() {
             3) configure_swap ;;
             4) show_private_key ;;
             5) stake_tokens ;;
+            6) start_with_pm2 ;;
             0) echo "退出程序。"; exit 0 ;;
             *) echo "无效选项，请重试。" ;;
         esac
