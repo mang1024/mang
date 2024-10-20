@@ -78,6 +78,7 @@ clone_repository() {
     cd masa-oracle || { echo "克隆失败，目录不存在！"; return; }
 
     echo "安装项目依赖..."
+    cd
     cd contracts
     npm install
     cd ..
@@ -86,6 +87,7 @@ clone_repository() {
 # 构建项目
 build_project() {
     echo "正在构建项目，请耐心等待..."
+    cd
     cd masa-oracle || { echo "构建失败，目录不存在！"; return; }
     make build
     echo "构建完成！"
@@ -97,7 +99,15 @@ create_env_file() {
     mkdir -p ~/masa-oracle
     cat <<EOL > ~/.env
 # Default .env configuration
-...
+BOOTNODES=/ip4/52.6.77.89/udp/4001/quic-v1/p2p/16Uiu2HAmBcNRvvXMxyj45fCMAmTKD4bkXu92Wtv4hpzRiTQNLTsL,/ip4/3.213.117.85/udp/4001/quic-v1/p2p/16Uiu2HAm7KfNcv3QBPRjANctYjcDnUvcog26QeJnhDN9nazHz9Wi,/ip4/52.20.183.116/udp/4001/quic-v1/p2p/16Uiu2HAm9Nkz9kEMnL1YqPTtXZHQZ1E9rhquwSqKNsUViqTojLZt
+RPC_URL=https://ethereum-sepolia.publicnode.com
+ENV=test
+FILE_PATH=.
+VALIDATOR=false
+PORT=8080
+TWITTER_SCRAPER=true
+TWITTER_ACCOUNTS=masabigbigbig:masabigbigbig0825
+USER_AGENTS="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36,Mozilla/5.0 (Macintosh; Intel Mac OS X 14.7; rv:131.0) Gecko/20100101 Firefox/131.0"
 EOL
 
     cp ~/.env ~/masa-oracle/.env
