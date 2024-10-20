@@ -8,24 +8,25 @@ install_go() {
     fi
 
     echo "正在安装 Go..."
-while true; do
-    wget https://go.dev/dl/go1.22.8.linux-amd64.tar.gz
-    if [ $? -ne 0 ]; then
-        echo "下载失败，请重试。"
-        continue
-    fi
-    sudo tar -C /usr/local -xzf go1.22.8.linux-amd64.tar.gz
-    echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
-    source ~/.bashrc
+    while true; do
+        wget https://go.dev/dl/go1.22.8.linux-amd64.tar.gz
+        if [ $? -ne 0 ]; then
+            echo "下载失败，请重试。"
+            continue
+        fi
+        sudo tar -C /usr/local -xzf go1.22.8.linux-amd64.tar.gz
+        echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
+        source ~/.bashrc
 
-    if go version; then
-        echo "Go 安装成功！"
-        break
-    else
-        echo "Go 安装失败，请重试。"
-        rm go1.22.8.linux-amd64.tar.gz
-    fi
-done
+        if go version; then
+            echo "Go 安装成功！"
+            break
+        else
+            echo "Go 安装失败，请重试。"
+            rm go1.22.8.linux-amd64.tar.gz
+        fi
+    done
+}
 
 # 安装 Node.js 和 PM2
 install_node_pm2() {
