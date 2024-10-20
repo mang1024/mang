@@ -37,6 +37,12 @@ install_go() {
     fi
 }
 
+# 确保以管理员权限运行
+    if [ "$EUID" -ne 0 ]; then
+        echo "请以管理员权限运行此脚本。"
+        exit 1
+    fi
+
 # 安装 Node.js 和 PM2
 install_node_pm2() {
     if command -v node &> /dev/null && command -v pm2 &> /dev/null; then
