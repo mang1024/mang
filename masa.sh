@@ -136,7 +136,7 @@ configure_swap() {
 
 # 显示私钥
 show_private_key() {
-    echo "切换到主目录并显示私钥..."
+    echo "显示私钥..."
     cd ~ || exit
     if [[ -f ~/.masa/masa_oracle_key.ecdsa ]]; then
         cat ~/.masa/masa_oracle_key.ecdsa
@@ -187,8 +187,8 @@ main_menu() {
         echo "3) 配置交换内存"
         echo "4) 显示私钥"
         echo "5) 领币质押"
-        echo "0) 退出"
         echo "6) 使用 PM2 启动项目"  
+        echo "0) 退出"
         read -p "请输入选项: " option
 
         case $option in
