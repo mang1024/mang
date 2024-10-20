@@ -15,8 +15,7 @@ install_go() {
             continue
         fi
         sudo tar -C /usr/local -xzf go1.22.8.linux-amd64.tar.gz
-        echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
-        source ~/.bashrc
+        export PATH=$PATH:/usr/local/go/bin
 
         if go version; then
             echo "Go 安装成功！"
