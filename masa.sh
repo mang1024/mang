@@ -184,7 +184,7 @@ main_menu() {
         echo "请选择操作:"
         echo "1) 安装配置文件并 Build"
         echo "2) 修改 Twitter 配置"
-        echo "3) 配置交换内存"
+        echo "3) 配置交换内存12GB"
         echo "4) 显示私钥"
         echo "5) 领币质押"
         echo "6) 使用 PM2 启动项目"  
