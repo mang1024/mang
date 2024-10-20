@@ -181,6 +181,10 @@ start_with_pm2() {
 # 主菜单
 main_menu() {
     while true; do
+
+
+        echo "---------------------------------"    
+        echo "---------------------------------"    
         echo "请选择操作:"
         echo "1) 安装配置文件并 Build"
         echo "2) 修改 Twitter 配置"
