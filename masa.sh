@@ -182,9 +182,6 @@ start_with_pm2() {
 main_menu() {
     while true; do
 
-
-        echo "                                 "    
-        echo "                                 "    
         echo "---------------------------------"    
         echo "---------------------------------"    
         echo "请选择操作:"
