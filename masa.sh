@@ -126,6 +126,7 @@ update_twitter_accounts() {
 # 配置交换内存
 configure_swap() {
     echo "正在配置交换内存..."
+    sudo swapoff /swapfile.img
     sudo rm /swapfile.img
     sudo fallocate -l 12G /swapfile
     sudo chmod 600 /swapfile
