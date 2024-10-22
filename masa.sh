@@ -171,12 +171,29 @@ start_with_pm2() {
     echo "正在使用 PM2 启动项目..."
     cd ~/masa-oracle || { echo "目录 masa-oracle 不存在！"; return; }
     
-    pm2 start make --name masa -- run
-    if [ $? -eq 0 ]; then
-        echo "项目启动成功！"
+    if pm2 list | grep -q masa; then
+        echo "项目已存在，正在启动..."
+        pm2 start masa
     else
-        echo "项目启动失败！"
+        echo "不存在，正在创建并启动..."
+        pm2 start make --name masa -- run
     fi
+
+    if [ $? -eq 0 ]; then
+        echo "启动成功！"
+    else
+        echo "启动失败！"
+    fi
+}
+
+view_pm2_logs() {
+    echo "正在查看日志"
+    pm2 logs masa
+}
+
+stop_pm2_masa() {
+    pm2 stop masa
+    echo "正在停止"
 }
 
 # 主菜单
@@ -191,7 +208,9 @@ main_menu() {
         echo "3) 配置交换内存12GB"
         echo "4) 显示私钥"
         echo "5) 领币质押"
-        echo "6) 使用 PM2 启动项目"  
+        echo "6) 使用 PM2 启动"  
+        echo "7) 查看日志" 
+        echo "8) 停止"
         echo "0) 退出"
         read -p "请输入选项: " option
 
@@ -208,6 +227,8 @@ main_menu() {
             4) show_private_key ;;
             5) stake_tokens ;;
             6) start_with_pm2 ;;
+            7) view_pm2_logs ;;
+            8) stop_pm2_masa ;;
             0) echo "退出程序。"; exit 0 ;;
             *) echo "无效选项，请重试。" ;;
         esac
