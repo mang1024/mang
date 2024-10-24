@@ -105,7 +105,7 @@ FILE_PATH=.
 VALIDATOR=false
 PORT=8080
 TWITTER_SCRAPER=true
-TWITTER_ACCOUNTS=masabigbigbig:masabigbigbig0825
+TWITTER_ACCOUNTS=zhangwanli50818:YUcm1024
 USER_AGENTS="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36,Mozilla/5.0 (Macintosh; Intel Mac OS X 14.7; rv:131.0) Gecko/20100101 Firefox/131.0"
 EOL
 
