@@ -83,15 +83,6 @@ clone_repository() {
     cd ..
 }
 
-# 构建项目
-build_project() {
-    echo "正在构建项目，请耐心等待..."
-    cd
-    cd masa-oracle || { echo "构建失败，目录不存在！"; return; }
-    make build
-    echo "构建完成！"
-}
-
 # 创建配置文件
 create_env_file() {
     echo "创建配置文件..."
@@ -110,6 +101,15 @@ USER_AGENTS="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 
 EOL
 
     cp ~/.env ~/masa-oracle/.env
+}
+
+# 构建项目
+build_project() {
+    echo "正在构建项目，请耐心等待..."
+    cd
+    cd masa-oracle || { echo "构建失败，目录不存在！"; return; }
+    make build
+    echo "构建完成！"
 }
 
 # 修改 Twitter 配置
@@ -220,8 +220,8 @@ main_menu() {
                 install_go
                 install_node_pm2
                 clone_repository
-                build_project
                 create_env_file
+                build_project
                 ;;
             2) update_twitter_accounts ;;
             3) configure_swap ;;
