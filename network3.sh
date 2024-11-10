@@ -2,12 +2,15 @@
 #停止原先的
 cd ubuntu-node
 sudo bash manager.sh down
-echo "已停止"
+echo "已停止，等待3秒 自动跳转"
+sleep 3
 
 #删除目录
 cd ..
 sudo rm -rf ~/ubuntu-node
-echo "已删除原先的配置"
+echo "已删除原先的配置，等待3秒，自动跳转"
+sleep 3
+
 # 下载并解压 ubuntu-node-v1.0
 wget https://network3.io/ubuntu-node-v2.1.0.tar
 tar -xf ubuntu-node-v2.1.0.tar
