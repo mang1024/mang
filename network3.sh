@@ -7,7 +7,7 @@ sleep 3
 
 #删除目录
 cd ..
-sudo rm -rf ~/ubuntu-node
+sudo rm -rf ~/ubuntu-node*
 echo "已删除原先的配置，等待3秒，自动跳转"
 sleep 3
 
