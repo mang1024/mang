@@ -8,10 +8,8 @@ echo "尝试停止服务"
 # 删除目录
 cd ~
 sudo rm -rf ~/ubuntu-node*
-echo "尝试删除 ~/ubuntu-node* 目录"
-
 sudo rm -rf ~/network*
-echo "尝试删除 ~/network* 目录"
+echo "尝试删除 旧文件"
 
 # 下载并解压 ubuntu-node-v2.1.0
 wget https://network3.io/ubuntu-node-v2.1.0.tar
@@ -23,14 +21,6 @@ cd ubuntu-node
 sudo bash manager.sh up
 echo "运行 manager.sh up"
 
-# 返回上级目录并再次下载和解压
-cd ..
-wget https://network3.io/ubuntu-node-v2.1.0.tar
-tar -xf ubuntu-node-v2.1.0.tar
-echo "再次下载并解压 ubuntu-node-v2.1.0"
-
-# 切换到目录并运行 manager.sh key
-cd ubuntu-node
 sudo bash manager.sh key
 echo "运行 manager.sh key"
 
