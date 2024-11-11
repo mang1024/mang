@@ -44,9 +44,7 @@ else
   sleep 3
 fi
 
-echo "所有操作完成"
-
-# 下载并解压 ubuntu-node-v1.0
+# 下载并解压 ubuntu-node-v2.1.0
 wget https://network3.io/ubuntu-node-v2.1.0.tar
 tar -xf ubuntu-node-v2.1.0.tar
 
