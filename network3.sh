@@ -1,15 +1,49 @@
 #!/bin/bash
-#停止原先的
-cd ubuntu-node
-sudo bash manager.sh down
-echo "已停止，等待3秒 自动跳转"
-sleep 3
 
-#删除目录
-cd ..
+# 检查并停止原先的服务
+cd ~/ubuntu-node || { echo "目录 ~/ubuntu-node 不存在，退出脚本"; exit 1; }
+
+# 检查 manager.sh 是否存在
+if [ -f manager.sh ]; then
+  # 检查服务是否在运行
+  if sudo bash manager.sh status | grep -q "running"; then
+    sudo bash manager.sh down
+    if [ $? -ne 0 ]; then
+      echo "停止服务失败，退出脚本"
+      exit 1
+    else
+      echo "已停止服务，等待3秒 自动跳转"
+      sleep 3
+    fi
+  else
+    echo "服务未运行，无需停止"
+  fi
+else
+  echo "manager.sh 脚本不存在，跳过停止服务"
+fi
+
+# 删除目录
+cd ~ || { echo "无法切换到主目录，退出脚本"; exit 1; }
 sudo rm -rf ~/ubuntu-node*
-echo "已删除原先的配置，等待3秒，自动跳转"
-sleep 3
+if [ $? -ne 0 ]; then
+  echo "删除 ~/ubuntu-node* 目录失败，退出脚本"
+  exit 1
+else
+  echo "已删除 ~/ubuntu-node* 目录，等待3秒 自动跳转"
+  sleep 3
+fi
+
+sudo rm -rf ~/network*
+if [ $? -ne 0 ]; then
+  echo "删除 ~/network* 目录失败，退出脚本"
+  exit 1
+else
+  echo "已删除 ~/network* 目录，等待3秒 自动跳转"
+  sleep 3
+fi
+
+echo "所有操作完成"
+
 
 # 下载并解压 ubuntu-node-v1.0
 wget https://network3.io/ubuntu-node-v2.1.0.tar
