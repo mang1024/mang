@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # 检查并停止原先的服务
-cd ~/ubuntu-node 2>/dev/null || { echo "目录 ~/ubuntu-node 不存在，跳过停止服务步骤"; SKIP_STOP=true; }
-
-if [ -z "$SKIP_STOP" ]; then
+if cd ~/ubuntu-node 2>/dev/null; then
   # 检查 manager.sh 是否存在
   if [ -f manager.sh ]; then
     # 检查服务是否在运行
@@ -22,6 +20,8 @@ if [ -z "$SKIP_STOP" ]; then
   else
     echo "manager.sh 脚本不存在，跳过停止服务"
   fi
+else
+  echo "目录 ~/ubuntu-node 不存在，跳过停止服务步骤"
 fi
 
 # 删除目录
