@@ -19,13 +19,7 @@ echo "下载并解压 ubuntu-node-v2.1.0"
 # 切换到目录并运行 manager.sh up
 cd ubuntu-node
 sudo bash manager.sh up
-echo "运行 manager.sh up"
-
 sudo bash manager.sh key
-echo "运行 manager.sh key"
-
 # 给 manager.sh 赋予执行权限
 sudo chmod +x manager.sh
-echo "赋予 manager.sh 执行权限"
-
 echo "成功执行，请复制 key 绑定你的账号"
