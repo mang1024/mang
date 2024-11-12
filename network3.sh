@@ -21,5 +21,5 @@ cd ubuntu-node
 sudo bash manager.sh up
 sudo bash manager.sh key
 # 给 manager.sh 赋予执行权限
-sudo chmod +x manager.sh
 echo "成功执行，请复制 key 绑定你的账号"
+sudo chmod +x manager.sh
