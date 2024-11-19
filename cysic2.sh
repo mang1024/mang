@@ -6,6 +6,7 @@ check_command() {
         echo "命令执行失败: $1"
         exit 1
     fi
+}
 
 # 检查 Node.js、npm 和 PM2 是否已安装
 check_installed() {
@@ -110,7 +111,6 @@ case $command in
     4)
         # 删除第一阶段测试网的相关信息
         read -p "确认删除第一阶段测试网的相关信息吗？(y/n): " confirm
-        if [ "$confirm" = "y"
         if [ "$confirm" = "y" ]; then
             # 删除相关文件和目录
             echo "正在删除第一阶段测试网的相关信息..."
