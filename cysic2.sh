@@ -17,9 +17,6 @@ check_installed() {
 
 # 安装 Node.js 和 PM2
 install_dependencies() {
-    echo "正在更新软件包列表..."
-    sudo apt update
-    check_command "更新软件包列表失败"
 
     if [ "$NODE_INSTALLED" = false ]; then
         echo "正在安装 Node.js 和 npm..."
