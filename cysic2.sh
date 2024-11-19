@@ -1,42 +1,132 @@
 #!/bin/bash
 
-# 更新软件包列表并安装 Node.js 和 npm
-echo "正在更新软件包列表并安装 Node.js 和 npm..."
-sudo apt update
-sudo apt install -y nodejs npm
+# 函数：检查命令是否成功执行
+check_command() {
+    if [ $? -ne 0 ]; then
+        echo "命令执行失败: $1"
+        exit 1
+    fi
 
-# 全局安装 PM2
-echo "正在全局安装 PM2..."
-sudo npm install -g pm2
+# 检查 Node.js、npm 和 PM2 是否已安装
+check_installed() {
+    command -v node >/dev/null 2>&1 && NODE_INSTALLED=true || NODE_INSTALLED=false
+    command -v npm >/dev/null 2>&1 && NPM_INSTALLED=true || NPM_INSTALLED=false
+    command -v pm2 >/dev/null 2>&1 && PM2_INSTALLED=true || PM2_INSTALLED=false
+}
 
-# 验证安装是否成功
-echo "验证安装是否成功..."
-node --version
-npm --version
-pm2 --version
+# 安装 Node.js 和 PM2
+install_dependencies() {
+    echo "正在更新软件包列表..."
+    sudo apt update
+    check_command "更新软件包列表失败"
 
-# 删除之前的配置信息
-echo "正在删除之前的配置信息..."
-rm -rf ~/cysic-verifier
-# rm -rf ~/.cysic
-cd ~
+    if [ "$NODE_INSTALLED" = false ]; then
+        echo "正在安装 Node.js 和 npm..."
+        sudo apt install -y nodejs npm
+        check_command "安装 Node.js 和 npm 失败"
+    else
+        echo "Node.js 和 npm 已安装，跳过安装。"
+    fi
 
-# 提示用户输入奖励地址
-read -p "请输入你的实际奖励地址: " reward_address
+    if [ "$PM2_INSTALLED" = false ]; then
+        echo "正在安装 PM2..."
+        if ! curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -; then
+            echo "Failed to add NodeSource repository. Trying alternative method..."
+            if ! curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -; then
+                echo "Failed to add NodeSource repository for Node.js 16.x. Exiting."
+                exit 1
+            fi
+        fi
 
-# 下载并配置验证器
-echo "正在下载并配置验证器..."
-curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/setup_linux.sh > ~/setup_linux.sh
-bash ~/setup_linux.sh "$reward_address"
+        if ! sudo apt-get install -y nodejs; then
+            echo "Failed to install Node.js. Exiting."
+            exit 1
+        fi
 
-# 确保 start.sh 可执行并使用 PM2 启动验证器
-echo "确保 start.sh 可执行并使用 PM2 启动验证器..."
-chmod +x ~/cysic-verifier/start.sh
-pm2 start ~/cysic-verifier/start.sh --name cysic-verifier
+        echo "Node.js 版本: $(node -v)"
+        echo "npm 版本: $(npm -v)"
 
-# 设置 PM2 在系统重启后自动启动
-echo "设置 PM2 在系统重启后自动启动..."
-pm2 startup
-pm2 save
+        if ! sudo npm install pm2 -g; then
+            echo "Failed to install PM2 using npm. Trying alternative method..."
+            if ! sudo apt install -y npm && sudo npm install pm2 -g; then
+                echo "Failed to install PM2. Exiting."
+                exit 1
+            fi
+        fi
 
-echo "Cysic Verifier 安装和配置完成！"
+        echo "PM2 版本: $(pm2 -v)"
+    else
+        echo "PM2 已安装，跳过安装。"
+    fi
+}
+
+# 主菜单
+echo "请选择命令:"
+echo "1. 安装 PM2 和配置验证器"
+echo "2. 启动验证器"
+echo "3. 停止并删除验证器"
+echo "4. 删除第一阶段测试网的相关信息"
+echo "0. 退出"
+read -p "请输入命令编号: " command
+
+case $command in
+    1)
+        check_installed
+        install_dependencies
+
+        # 提示用户输入奖励地址
+        read -p "请输入你的实际奖励地址: " reward_address
+
+        # 下载并配置验证器
+        echo "正在下载并配置验证器..."
+        curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/setup_linux.sh -o ~/setup_linux.sh
+        bash ~/setup_linux.sh "$reward_address"
+        ;;
+
+    2)
+        # 启动验证器
+        if [ ! -f pm2-start.sh ]; then
+            echo "正在创建 pm2-start.sh 脚本..."
+            echo -e '#!/bin/bash\ncd ~/cysic-verifier/ && bash start.sh' > pm2-start.sh
+            chmod +x pm2-start.sh
+        fi
+
+        echo "正在启动验证器..."
+        pm2 start ./pm2-start.sh --interpreter bash --name cysic-verifier
+        echo "设置 PM2 在系统重启后自动启动..."
+        pm2 startup
+        pm2 save
+        echo "Cysic Verifier 启动完成！"
+        ;;
+
+    3)
+        # 停止并删除验证器
+        echo "正在停止并删除验证器..."
+        pm2 stop cysic-verifier
+        pm2 delete cysic-verifier
+        echo "验证器已停止并删除！"
+        ;;
+
+    4)
+        # 删除第一阶段测试网的相关信息
+        read -p "确认删除第一阶段测试网的相关信息吗？(y/n): " confirm
+        if [ "$confirm" = "y"
+        if [ "$confirm" = "y" ]; then
+            # 删除相关文件和目录
+            echo "正在删除第一阶段测试网的相关信息..."
+            rm -rf ~/cysic-verifier
+            echo "第一阶段测试网的相关信息已删除！"
+        else
+            echo "取消删除操作。"
+        fi
+        ;;
+
+    0)
+        echo "退出程序。"
+        exit 0
+        ;;
+
+    *)
+        echo "无效的命令编号，请重新输入。"
+        ;;
+esac
