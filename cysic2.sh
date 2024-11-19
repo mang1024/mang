@@ -68,7 +68,7 @@ echo "2. 启动验证器"
 echo "3. 停止并删除验证器"
 echo "4. 删除第一阶段测试网的相关信息"
 echo "0. 退出"
-read -p "请输入命令编号: " command
+read -p "请输入命令: " command
 
 case $command in
     1)
@@ -114,9 +114,9 @@ case $command in
         if [ "$confirm" = "y" ]; then
             # 删除相关文件和目录
             echo "正在删除第一阶段测试网的相关信息..."
-            rm -rf ~/cysic-verifier
-            rm -rf ~/.cysic
-            rm -rf ~/scr*
+            sudo rm -rf ~/cysic-verifier
+            sudo rm -rf ~/.cysic
+            sudo rm -rf ~/scr*
             echo "第一阶段测试网的相关信息已删除！"
         else
             echo "取消删除操作。"
