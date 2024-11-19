@@ -76,6 +76,17 @@ while true; do
             check_installed
             install_dependencies
             echo "PM2 和配置验证器安装完成，返回主菜单..."
+
+            # 提示用户输入奖励地址
+            read -p "请输入你的实际奖励地址: " reward_address
+
+            # 下载并配置验证器
+            echo "正在下载并配置验证器..."
+            if curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/setup_linux.sh -o ~/setup_linux.sh; then
+                bash ~/setup_linux.sh "$reward_address"
+            else
+                echo "下载失败，请检查 URL 或网络连接。"
+            fi
             ;;
 
         2)
@@ -87,8 +98,11 @@ while true; do
             fi
 
             echo "正在启动验证器..."
-            pm2 start ./pm2-start.sh --interpreter bash --name cysic-verifier
-            echo "Cysic Verifier 启动完成，返回主菜单..."
+            if pm2 start ./pm2-start.sh --interpreter bash --name cysic-verifier; then
+                echo "Cysic Verifier 启动完成，返回主菜单..."
+            else
+                echo "启动失败，请检查 PM2 和脚本。"
+            fi
             ;;
 
         3)
