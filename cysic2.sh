@@ -115,6 +115,8 @@ case $command in
             # 删除相关文件和目录
             echo "正在删除第一阶段测试网的相关信息..."
             rm -rf ~/cysic-verifier
+            rm -rf ~/.cysic
+            rm -rf ~/scr*
             echo "第一阶段测试网的相关信息已删除！"
         else
             echo "取消删除操作。"
