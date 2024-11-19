@@ -18,7 +18,7 @@ pm2 --version
 # 删除之前的配置信息
 echo "正在删除之前的配置信息..."
 rm -rf ~/cysic-verifier
-rm -rf ~/.cysic
+# rm -rf ~/.cysic
 cd ~
 
 # 提示用户输入奖励地址
