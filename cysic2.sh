@@ -120,7 +120,7 @@ while true; do
                 echo "正在删除第一阶段测试网的相关信息..."
                 sudo rm -rf ~/cysic-verifier
                 sudo rm -rf ~/.cysic
-                sudo rm -rf ~/scr*
+                sudo rm -rf ~/.scr*
                 echo "第一阶段测试网的相关信息已删除，返回主菜单..."
             else
                 echo "取消删除操作，返回主菜单。"
