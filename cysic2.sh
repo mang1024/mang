@@ -75,14 +75,7 @@ while true; do
         1)
             check_installed
             install_dependencies
-
-            # 提示用户输入奖励地址
-            read -p "请输入你的实际奖励地址: " reward_address
-
-            # 下载并配置验证器
-            echo "正在下载并配置验证器..."
-            curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/setup_linux.sh -o ~/setup_linux.sh
-            bash ~/setup_linux.sh "$reward_address"
+            echo "PM2 和配置验证器安装完成，返回主菜单..."
             ;;
 
         2)
@@ -95,10 +88,7 @@ while true; do
 
             echo "正在启动验证器..."
             pm2 start ./pm2-start.sh --interpreter bash --name cysic-verifier
-            echo "设置 PM2 在系统重启后自动启动..."
-            pm2 startup
-            pm2 save
-            echo "Cysic Verifier 启动完成！"
+            echo "Cysic Verifier 启动完成，返回主菜单..."
             ;;
 
         3)
@@ -106,21 +96,20 @@ while true; do
             echo "正在停止并删除验证器..."
             pm2 stop cysic-verifier
             pm2 delete cysic-verifier
-            echo "验证器已停止并删除！"
+            echo "验证器已停止并删除，返回主菜单..."
             ;;
 
         4)
             # 删除第一阶段测试网的相关信息
             read -p "确认删除第一阶段测试网的相关信息吗？(y/n): " confirm
             if [ "$confirm" = "y" ]; then
-                # 删除相关文件和目录
                 echo "正在删除第一阶段测试网的相关信息..."
                 sudo rm -rf ~/cysic-verifier
                 sudo rm -rf ~/.cysic
                 sudo rm -rf ~/scr*
-                echo "第一阶段测试网的相关信息已删除！"
+                echo "第一阶段测试网的相关信息已删除，返回主菜单..."
             else
-                echo "取消删除操作。"
+                echo "取消删除操作，返回主菜单。"
             fi
             ;;
 
