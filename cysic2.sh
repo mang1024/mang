@@ -61,74 +61,76 @@ install_dependencies() {
     fi
 }
 
-# 主菜单
-echo "请选择命令:"
-echo "1. 安装 PM2 和配置验证器"
-echo "2. 启动验证器"
-echo "3. 停止并删除验证器"
-echo "4. 删除第一阶段测试网的相关信息"
-echo "0. 退出"
-read -p "请输入命令: " command
+# 主菜单循环
+while true; do
+    echo "请选择命令:"
+    echo "1. 安装 PM2 和配置验证器"
+    echo "2. 启动验证器"
+    echo "3. 停止并删除验证器"
+    echo "4. 删除第一阶段测试网的相关信息"
+    echo "0. 退出"
+    read -p "请输入命令: " command
 
-case $command in
-    1)
-        check_installed
-        install_dependencies
+    case $command in
+        1)
+            check_installed
+            install_dependencies
 
-        # 提示用户输入奖励地址
-        read -p "请输入你的实际奖励地址: " reward_address
+            # 提示用户输入奖励地址
+            read -p "请输入你的实际奖励地址: " reward_address
 
-        # 下载并配置验证器
-        echo "正在下载并配置验证器..."
-        curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/setup_linux.sh -o ~/setup_linux.sh
-        bash ~/setup_linux.sh "$reward_address"
-        ;;
+            # 下载并配置验证器
+            echo "正在下载并配置验证器..."
+            curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/setup_linux.sh -o ~/setup_linux.sh
+            bash ~/setup_linux.sh "$reward_address"
+            ;;
 
-    2)
-        # 启动验证器
-        if [ ! -f pm2-start.sh ]; then
-            echo "正在创建 pm2-start.sh 脚本..."
-            echo -e '#!/bin/bash\ncd ~/cysic-verifier/ && bash start.sh' > pm2-start.sh
-            chmod +x pm2-start.sh
-        fi
+        2)
+            # 启动验证器
+            if [ ! -f pm2-start.sh ]; then
+                echo "正在创建 pm2-start.sh 脚本..."
+                echo -e '#!/bin/bash\ncd ~/cysic-verifier/ && bash start.sh' > pm2-start.sh
+                chmod +x pm2-start.sh
+            fi
 
-        echo "正在启动验证器..."
-        pm2 start ./pm2-start.sh --interpreter bash --name cysic-verifier
-        echo "设置 PM2 在系统重启后自动启动..."
-        pm2 startup
-        pm2 save
-        echo "Cysic Verifier 启动完成！"
-        ;;
+            echo "正在启动验证器..."
+            pm2 start ./pm2-start.sh --interpreter bash --name cysic-verifier
+            echo "设置 PM2 在系统重启后自动启动..."
+            pm2 startup
+            pm2 save
+            echo "Cysic Verifier 启动完成！"
+            ;;
 
-    3)
-        # 停止并删除验证器
-        echo "正在停止并删除验证器..."
-        pm2 stop cysic-verifier
-        pm2 delete cysic-verifier
-        echo "验证器已停止并删除！"
-        ;;
+        3)
+            # 停止并删除验证器
+            echo "正在停止并删除验证器..."
+            pm2 stop cysic-verifier
+            pm2 delete cysic-verifier
+            echo "验证器已停止并删除！"
+            ;;
 
-    4)
-        # 删除第一阶段测试网的相关信息
-        read -p "确认删除第一阶段测试网的相关信息吗？(y/n): " confirm
-        if [ "$confirm" = "y" ]; then
-            # 删除相关文件和目录
-            echo "正在删除第一阶段测试网的相关信息..."
-            sudo rm -rf ~/cysic-verifier
-            sudo rm -rf ~/.cysic
-            sudo rm -rf ~/scr*
-            echo "第一阶段测试网的相关信息已删除！"
-        else
-            echo "取消删除操作。"
-        fi
-        ;;
+        4)
+            # 删除第一阶段测试网的相关信息
+            read -p "确认删除第一阶段测试网的相关信息吗？(y/n): " confirm
+            if [ "$confirm" = "y" ]; then
+                # 删除相关文件和目录
+                echo "正在删除第一阶段测试网的相关信息..."
+                sudo rm -rf ~/cysic-verifier
+                sudo rm -rf ~/.cysic
+                sudo rm -rf ~/scr*
+                echo "第一阶段测试网的相关信息已删除！"
+            else
+                echo "取消删除操作。"
+            fi
+            ;;
 
-    0)
-        echo "退出程序。"
-        exit 0
-        ;;
+        0)
+            echo "退出程序。"
+            exit 0
+            ;;
 
-    *)
-        echo "无效的命令编号，请重新输入。"
-        ;;
-esac
+        *)
+            echo "无效的命令编号，请重新输入。"
+            ;;
+    esac
+done
