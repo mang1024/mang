@@ -16,7 +16,6 @@ check_installed() {
 }
 
 # 安装 Node.js 和 PM2
-# 安装 Node.js 和 PM2
 install_dependencies() {
     echo "正在更新软件包列表..."
     sudo apt update
@@ -25,16 +24,15 @@ install_dependencies() {
     echo "正在安装 Node.js 和 PM2..."
     if ! curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -; then
         echo "添加 NodeSource 仓库失败，尝试备用方法..."
-        sudo apt update
         if ! curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -; then
             echo "添加 NodeSource 仓库失败，退出。"
-            return 1
+            exit 1
         fi
     fi
 
     if ! sudo apt-get install -y nodejs; then
         echo "安装 Node.js 失败，退出。"
-        return 1
+        exit 1
     fi
 
     echo "Node.js 版本: $(node -v)"
@@ -42,12 +40,10 @@ install_dependencies() {
 
     # 检查 PM2 是否已安装
     if ! command -v pm2 &> /dev/null; then
+        echo "PM2 未安装，正在安装..."
         if ! sudo npm install pm2 -g; then
-            echo "通过 npm 安装 PM2 失败，尝试备用方法..."
-            if ! sudo apt install -y npm && sudo npm install pm2 -g; then
-                echo "安装 PM2 失败，退出。"
-                return 1
-            fi
+            echo "通过 npm 安装 PM2 失败，退出。"
+            exit 1
         fi
     else
         echo "PM2 已安装，跳过安装。"
@@ -63,13 +59,18 @@ while true; do
     echo "2. 启动验证器"
     echo "3. 停止并删除验证器"
     echo "4. 删除第一阶段测试网的相关信息"
+    echo "5) 查看日志"
     echo "0. 退出"
     read -p "请输入命令: " command
 
     case $command in
         1)
             check_installed
-            install_dependencies
+            if [ "$NODE_INSTALLED" = false ] || [ "$NPM_INSTALLED" = false ] || [ "$PM2_INSTALLED" = false ]; then
+                install_dependencies
+            else
+                echo "Node.js、npm 和 PM2 已安装，跳过安装。"
+            fi
             echo "PM2 和配置验证器安装完成，返回主菜单..."
 
             # 提示用户输入奖励地址
@@ -119,6 +120,13 @@ while true; do
             else
                 echo "取消删除操作，返回主菜单。"
             fi
+            ;;
+            
+        5)
+            # 查看验证器日志
+            echo "正在查看验证器日志..."
+            pm2 logs cysic-verifier
+            echo "按 Ctrl+C 退出日志查看。"
             ;;
 
         0)
