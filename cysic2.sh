@@ -61,6 +61,7 @@ while true; do
             echo "正在下载并配置验证器..."
             if curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/setup_linux.sh -o ~/setup_linux.sh; then
                 bash ~/setup_linux.sh "$reward_address"
+                check_command "配置验证器失败"
             else
                 echo "下载失败，请检查 URL 或网络连接。"
             fi
@@ -110,7 +111,7 @@ while true; do
             ;;
 
         *)
-            echo "无效的命令编号，请重新输入。"
+            echo "无效的命令，请输入 0-4 之间的数字。"
             ;;
     esac
 done
