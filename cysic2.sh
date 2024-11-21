@@ -23,7 +23,10 @@ install_dependencies() {
 
     if [ "$NODE_INSTALLED" = false ]; then
         echo "正在安装 Node.js 和 npm..."
-        sudo apt install nodejs
+        sudo apt remove -y nodejs
+        sudo apt autoremove -y
+        sudo apt clean
+        sudo apt install -y nodejs
         check_command "安装 Node.js 和 npm 失败"
     else
         echo "Node.js 和 npm 已安装，跳过安装。"
