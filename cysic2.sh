@@ -17,45 +17,27 @@ check_installed() {
 
 # 安装 Node.js 和 PM2
 install_dependencies() {
-
-    if [ "$NODE_INSTALLED" = false ]; then
+    # 检查 Node.js 是否已安装
+    if ! command -v node &> /dev/null; then
         echo "正在安装 Node.js 和 npm..."
-        sudo apt install -y nodejs npm
+        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+        sudo apt install -y nodejs
         check_command "安装 Node.js 和 npm 失败"
     else
         echo "Node.js 和 npm 已安装，跳过安装。"
     fi
 
-    if [ "$PM2_INSTALLED" = false ]; then
+    # 检查 PM2 是否已安装
+    if ! command -v pm2 &> /dev/null; then
         echo "正在安装 PM2..."
-        if ! curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -; then
-            echo "Failed to add NodeSource repository. Trying alternative method..."
-            if ! curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -; then
-                echo "Failed to add NodeSource repository for Node.js 16.x. Exiting."
-                exit 1
-            fi
-        fi
-
-        if ! sudo apt-get install -y nodejs; then
-            echo "Failed to install Node.js. Exiting."
-            exit 1
-        fi
-
-        echo "Node.js 版本: $(node -v)"
-        echo "npm 版本: $(npm -v)"
-
-        if ! sudo npm install pm2 -g; then
-            echo "Failed to install PM2 using npm. Trying alternative method..."
-            if ! sudo apt install -y npm && sudo npm install pm2 -g; then
-                echo "Failed to install PM2. Exiting."
-                exit 1
-            fi
-        fi
-
+        sudo npm install -g pm2
+        check_command "安装 PM2 失败"
         echo "PM2 版本: $(pm2 -v)"
     else
         echo "PM2 已安装，跳过安装。"
     fi
+}
+
 }
 
 # 主菜单循环
