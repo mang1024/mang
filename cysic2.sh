@@ -38,8 +38,6 @@ install_dependencies() {
     fi
 }
 
-}
-
 # 主菜单循环
 while true; do
     echo "请选择命令:"
