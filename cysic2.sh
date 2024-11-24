@@ -60,6 +60,7 @@ while true; do
     echo "3. 停止并删除验证器"
     echo "4. 删除第一阶段测试网的相关信息"
     echo "5) 查看日志"
+    echo "6) 更新验证者（自动停止跟启动）"
     echo "0. 退出"
     read -p "请输入命令: " command
 
@@ -127,6 +128,20 @@ while true; do
             echo "正在查看验证器日志..."
             pm2 logs cysic-verifier
             echo "按 Ctrl+C 退出日志查看。"
+            ;;
+
+        6)
+            # 更新配置文件
+            echo "正在停止验证器，2秒后执行更新。"
+            sleep 2
+            pm2 stop cysic-verifier
+            curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/verifier_linux > ~/cysic-verifier/verifier
+            curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/libdarwin_verifier.so > ~/cysic-verifier/libdarwin_verifier.so
+            sh 
+            sleep 5
+            echo "更新完成，5秒后将重新启动验证器。"
+            chmod +x ~/cysic-verifier/verifier
+            pm2 start cysic-verifier
             ;;
 
         0)
