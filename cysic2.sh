@@ -55,7 +55,7 @@ install_dependencies() {
 # 主菜单循环
 while true; do
     echo "请选择命令:"
-    echo "1. 安装 PM2 和配置验证器"
+    echo "1. 下载配置环境并设置地址"
     echo "2. 启动验证器"
     echo "3. 停止并删除验证器"
     echo "4) 更新验证者（自动停止跟启动）"
