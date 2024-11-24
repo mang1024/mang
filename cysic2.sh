@@ -55,13 +55,12 @@ install_dependencies() {
 # 主菜单循环
 while true; do
     echo "请选择命令:"
-    echo "1. 安装 PM2 和配置验证器"
-    echo "2. 下载配置环境并设置地址"  # 修改了这里，确保选项编号唯一
-    echo "3. 启动验证器"
-    echo "4. 停止并删除验证器"
-    echo "5. 更新验证者（自动停止跟启动）"
-    echo "6. 查看日志"
-    echo "7. 创建 cysic 监控异常自动重启脚本"
+    echo "1. 下载配置环境并设置地址"  
+    echo "2. 启动验证器"
+    echo "3. 停止并删除验证器"
+    echo "4. 更新验证者（自动停止跟启动）"
+    echo "5. 查看日志"
+    echo "6. 创建 cysic 监控异常自动重启脚本"
     echo "0. 退出"
     read -p "请输入命令: " command
 
@@ -212,7 +211,7 @@ EOF
             echo "cysic-monitor.js 创建完成，返回主菜单..."
             ;;
 
-        7)
+        0)
             # 退出脚本
             echo "退出脚本..."
             exit 0
