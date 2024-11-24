@@ -56,12 +56,12 @@ install_dependencies() {
 while true; do
     echo "请选择命令:"
     echo "1. 安装 PM2 和配置验证器"
-    echo "1. 下载配置环境并设置地址"
-    echo "2. 启动验证器"
-    echo "3. 停止并删除验证器"
-    echo "4) 更新验证者（自动停止跟启动）"
-    echo "5) 查看日志"
-    echo "6) 创建 cysic 监控异常自动重启脚本"
+    echo "2. 下载配置环境并设置地址"  # 修改了这里，确保选项编号唯一
+    echo "3. 启动验证器"
+    echo "4. 停止并删除验证器"
+    echo "5. 更新验证者（自动停止跟启动）"
+    echo "6. 查看日志"
+    echo "7. 创建 cysic 监控异常自动重启脚本"
     echo "0. 退出"
     read -p "请输入命令: " command
 
@@ -112,7 +112,7 @@ while true; do
             ;;
 
         4)
-            #更新配置文件
+            # 更新配置文件
             echo "正在停止验证器，2秒后执行更新。"
             pm2 stop cysic-verifier
             sleep 2
@@ -133,8 +133,9 @@ while true; do
 
         6)
             # 创建 cysic 监控异常自动重启脚本
-echo "正在创建 cysic 监控异常自动重启脚本..."
-cat << 'EOF' > ~/cysic-monitor.js
+            mkdir -p ~/.pm2/logs
+            echo "正在创建 cysic 监控异常自动重启脚本..."
+            cat << 'EOF' > ~/cysic-monitor.js
 const { spawn } = require('child_process');
 const fs = require('fs').promises;
 const os = require('os');
@@ -194,29 +195,31 @@ function restartPM2() {
     restart.stderr.on('data', (data) => {
         const errorOutput = data.toString();
         console.error(\`PM2 stderr: \${errorOutput}\`); // 调试信息：PM2 的错误输出
-        logMessage(\`PM2 stderr: \${errorOutput}\`); // 记录 PM2 的错误输出
+                logMessage(\`PM2 stderr: \${errorOutput}\`); // 记录 PM2 的错误输出
     });
 
     restart.on('close', (code) => {
-        const closeMessage = \`pm2 restart process exited with code \${code}\`;
-        console.log(closeMessage); // 调试信息：重启进程结束
-        logMessage(closeMessage);
+        console.log(\`PM2 process exited with code: \${code}\`); // 调试信息：PM2 进程退出代码
+        logMessage(\`PM2 process exited with code: \${code}\`); // 记录 PM2 进程退出代码
     });
 }
+
+// 启动监控脚本
+(async () => {
+    await logMessage('Cysic Monitor started.'); // 启动监控脚本的日志
+})();
 EOF
-     chmod +x ~/cysic-monitor.js
-     echo "cysic 监控异常自动重启脚本创建完成，路径为: ~/cysic-monitor.js"
-     # 自动执行脚本
-     node ~/cysic-monitor.js &
+            echo "cysic-monitor.js 创建完成，返回主菜单..."
             ;;
 
-        0)
-            echo "退出程序。"
+        7)
+            # 退出脚本
+            echo "退出脚本..."
             exit 0
             ;;
 
         *)
-            echo "无效的命令编号，请重新输入。"
+            echo "无效选项，请选择有效的菜单选项。"
             ;;
     esac
 done
