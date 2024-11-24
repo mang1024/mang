@@ -6,7 +6,6 @@ check_command() {
         echo "命令执行失败: $1"
         exit 1
     fi
-}
 
 # 检查 Node.js、npm 和 PM2 是否已安装
 check_installed() {
@@ -96,6 +95,84 @@ while true; do
             echo "正在启动验证器..."
             if pm2 start ./pm2-start.sh --interpreter bash --name cysic-verifier; then
                 echo "Cysic Verifier 启动完成，返回主菜单..."
+                
+                # 启动 Node.js 监控脚本
+                if [ ! -f ~/cysic-verifier/monitor.js ]; then
+                    echo "监控脚本不存在，正在创建 monitor.js 脚本..."
+                    cat << 'EOF' > ~/cysic-verifier/monitor.js
+const { spawn } = require('child_process');
+const fs = require('fs').promises;
+const os = require('os');
+const path = require('path');
+
+const homeDir = os.homedir();
+const logFilePath = path.join(homeDir, '.pm2/logs/cysic-verifier-error.log');
+const outputLogFilePath = path.join(homeDir, '.pm2/logs/cysic-verifier-monitor.log');
+const delay = 5 * 60 * 1000;
+
+async function logMessage(message) {
+    const timestamp = new Date().toISOString();
+    const logEntry = `${timestamp} - ${message}\n`;
+    try {
+        await fs.appendFile(outputLogFilePath, logEntry);
+        console.log(`Logged message: ${logEntry}`);
+    } catch (err) {
+        console.error(`Error writing to log file: ${err}`);
+    }
+}
+
+setInterval(async () => {
+    try {
+        console.log('Checking log file...');
+        const stats = await fs.stat(logFilePath);
+        const lastModifiedTime = new Date(stats.mtime);
+        const currentTime = new Date();
+        const timeDiff = currentTime - lastModifiedTime;
+
+        await logMessage(`Checked log file. Last modified time: ${lastModifiedTime.toISOString()}. Time since last update: ${timeDiff / 1000} seconds.`);
+
+        if (timeDiff > delay) {
+            const restartMessage = 'No log updates in the last minute. Restarting cysic-verifier...';
+            await logMessage(restartMessage);
+            restartPM2();
+        } else {
+            console.log('Log file has been updated recently.');
+        }
+    } catch (err) {
+        console.error(`Error checking log file: ${err}`);
+        await logMessage(`Error checking log file: ${err}`);
+    }
+}, delay);
+
+function restartPM2() {
+    console.log('Attempting to restart PM2 service...');
+    const restart = spawn('pm2', ['restart', 'cysic-verifier']);
+    
+    restart.stdout.on('data', (data) => {
+        const output = data.toString();
+        console.log(`PM2 stdout: ${output}`);
+        logMessage(`PM2 stdout: ${output}`);
+    });
+
+    restart.stderr.on('data', (data) => {
+        const errorOutput = data.toString();
+        console.error(`PM2 stderr: ${errorOutput}`);
+        logMessage(`PM2 stderr: ${errorOutput}`);
+    });
+
+    restart.on('close', (code) => {
+        const closeMessage = `pm2 restart process exited with code ${code}`;
+        console.log(closeMessage);
+        logMessage(closeMessage);
+    });
+}
+EOF
+                    chmod +x ~/cysic-verifier/monitor.js
+                fi
+
+                echo "正在启动监控脚本..."
+                pm2 start ~/cysic-verifier/monitor.js --name cysic-verifier-monitor
+
             else
                 echo "启动失败，请检查 PM2 和脚本。"
             fi
@@ -110,7 +187,7 @@ while true; do
             ;;
 
         4)
-            #更新配置文件
+            # 更新配置文件
             echo "正在停止验证器，2秒后执行更新。"
             pm2 stop cysic-verifier
             sleep 2
@@ -121,21 +198,35 @@ while true; do
             chmod +x ~/cysic-verifier/verifier
             pm2 start cysic-verifier
             ;;
-            
+
         5)
-            # 查看验证器日志
-            echo "正在查看验证器日志..."
-            pm2 logs cysic-verifier
-            echo "按 Ctrl+C 退出日志查看。"
+            # 查看 PM2 状态
+            echo "正在获取 PM2 状态..."
+            pm2 status
             ;;
 
-        0)
-            echo "退出程序。"
+        6)
+            # 查看日志
+            echo "正在查看 cysic-verifier 日志..."
+            pm2 logs cysic-verifier
+            ;;
+
+        7)
+            # 停止监控脚本
+            echo "正在停止监控脚本..."
+            pm2 stop cysic-verifier-monitor
+            pm2 delete cysic-verifier-monitor
+            echo "监控脚本已停止并删除，返回主菜单..."
+            ;;
+
+        8)
+            # 退出脚本
+            echo "正在退出..."
             exit 0
             ;;
 
         *)
-            echo "无效的命令编号，请重新输入。"
+            echo "无效的选项，请选择一个有效的菜单选项。"
             ;;
     esac
 done
