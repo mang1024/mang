@@ -137,7 +137,6 @@ while true; do
             pm2 stop cysic-verifier
             curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/verifier_linux > ~/cysic-verifier/verifier
             curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/libdarwin_verifier.so > ~/cysic-verifier/libdarwin_verifier.so
-            sh 
             sleep 5
             echo "更新完成，5秒后将重新启动验证器。"
             chmod +x ~/cysic-verifier/verifier
