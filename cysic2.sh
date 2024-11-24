@@ -208,6 +208,7 @@ EOF
      echo "cysic 监控异常自动重启脚本创建完成，路径为: ~/cysic-monitor.js"
      # 自动执行脚本
      node ~/cysic-monitor.js &
+            ;;
 
         0)
             echo "退出程序。"
