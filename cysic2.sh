@@ -134,7 +134,7 @@ while true; do
             # 更新配置文件
             echo "正在停止验证器，2秒后执行更新。"
             pm2 stop cysic-verifier
-            leep 2
+            sleep 2
             curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/verifier_linux > ~/cysic-verifier/verifier
             curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/libdarwin_verifier.so > ~/cysic-verifier/libdarwin_verifier.so
             echo "更新完成，5秒后将重新启动验证器。"
