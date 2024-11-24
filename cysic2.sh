@@ -58,9 +58,8 @@ while true; do
     echo "1. 安装 PM2 和配置验证器"
     echo "2. 启动验证器"
     echo "3. 停止并删除验证器"
-    echo "4. 删除第一阶段测试网的相关信息"
+    echo "4) 更新验证者（自动停止跟启动）"
     echo "5) 查看日志"
-    echo "6) 更新验证者（自动停止跟启动）"
     echo "0. 退出"
     read -p "请输入命令: " command
 
@@ -111,27 +110,7 @@ while true; do
             ;;
 
         4)
-            # 删除第一阶段测试网的相关信息
-            read -p "确认删除第一阶段测试网的相关信息吗？(y/n): " confirm
-            if [ "$confirm" = "y" ]; then
-                echo "正在删除第一阶段测试网的相关信息..."
-                sudo rm -rf ~/cysic-verifier
-                sudo rm -rf ~/.scr*
-                echo "第一阶段测试网的相关信息已删除，返回主菜单..."
-            else
-                echo "取消删除操作，返回主菜单。"
-            fi
-            ;;
-            
-        5)
-            # 查看验证器日志
-            echo "正在查看验证器日志..."
-            pm2 logs cysic-verifier
-            echo "按 Ctrl+C 退出日志查看。"
-            ;;
-
-        6)
-            # 更新配置文件
+            #更新配置文件
             echo "正在停止验证器，2秒后执行更新。"
             pm2 stop cysic-verifier
             sleep 2
@@ -141,6 +120,13 @@ while true; do
             sleep 5
             chmod +x ~/cysic-verifier/verifier
             pm2 start cysic-verifier
+            ;;
+            
+        5)
+            # 查看验证器日志
+            echo "正在查看验证器日志..."
+            pm2 logs cysic-verifier
+            echo "按 Ctrl+C 退出日志查看。"
             ;;
 
         0)
