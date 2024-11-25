@@ -140,6 +140,7 @@ while true; do
               sleep 2
               pm2 start ./cyjk.js --name "cyjk"
               echo "查看异常重启日志请使用命令 pm2 logs cyjk"
+              sleep 5
             else
               echo "下载失败，请检查网络连接或URL是否正确"
             fi
