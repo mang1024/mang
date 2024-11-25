@@ -54,6 +54,9 @@ install_dependencies() {
 
 # 主菜单循环
 while true; do
+    echo "华为云慎用！！！"
+    echo "华为云慎用！！"
+    echo "华为云慎用！！"
     echo "请选择命令:"
     echo "1. 下载配置环境并设置地址"
     echo "2. 启动验证器"
