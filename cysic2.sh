@@ -55,11 +55,12 @@ install_dependencies() {
 # 主菜单循环
 while true; do
     echo "请选择命令:"
-    echo "1. 安装 PM2 和配置验证器"
+    echo "1. 下载配置环境并设置地址"
     echo "2. 启动验证器"
     echo "3. 停止并删除验证器"
-    echo "4. 删除第一阶段测试网的相关信息"
-    echo "5) 查看日志"
+    echo "4. 更新验证者（自动停止跟启动）"
+    echo "5. 查看日志"
+    echo "6. 创建 cysic 监控异常自动重启脚本----感谢作者0xlyc"
     echo "0. 退出"
     read -p "请输入命令: " command
 
@@ -110,18 +111,19 @@ while true; do
             ;;
 
         4)
-            # 删除第一阶段测试网的相关信息
-            read -p "确认删除第一阶段测试网的相关信息吗？(y/n): " confirm
-            if [ "$confirm" = "y" ]; then
-                echo "正在删除第一阶段测试网的相关信息..."
-                sudo rm -rf ~/cysic-verifier
-                sudo rm -rf ~/.scr*
-                echo "第一阶段测试网的相关信息已删除，返回主菜单..."
-            else
-                echo "取消删除操作，返回主菜单。"
-            fi
+            # 更新配置文件
+            #更新配置文件
+            echo "正在停止验证器，2秒后执行更新。"
+            pm2 stop cysic-verifier
+            sleep 2
+            curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/verifier_linux > ~/cysic-verifier/verifier
+            curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/libdarwin_verifier.so > ~/cysic-verifier/libdarwin_verifier.so
+            echo "更新完成，5秒后将重新启动验证器。"
+            sleep 5
+            chmod +x ~/cysic-verifier/verifier
+            pm2 start cysic-verifier
             ;;
-            
+
         5)
             # 查看验证器日志
             echo "正在查看验证器日志..."
@@ -129,12 +131,28 @@ while true; do
             echo "按 Ctrl+C 退出日志查看。"
             ;;
 
+        6)
+            # 创建 cysic 监控异常自动重启脚本
+            echo "正在下载监控脚本---作者0xlyx"
+            curl -O https://raw.githubusercontent.com/mang1024/mang/refs/heads/main/cyjk.js
+            if [ $? -eq 0 ]; then
+              echo "2秒后执行脚本操作"
+              sleep 2
+              pm2 start ./cyjk.js --name "cyjk"
+              echo "查看异常重启日志请使用命令 pm2 logs cyjk"
+            else
+              echo "下载失败，请检查网络连接或URL是否正确"
+            fi
+            ;;
         0)
+            # 退出脚本
+            echo "退出脚本..."
             echo "退出程序。"
             exit 0
             ;;
 
         *)
+            echo "无效选项，请选择有效的菜单选项。"
             echo "无效的命令编号，请重新输入。"
             ;;
     esac
