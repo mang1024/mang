@@ -58,9 +58,9 @@ while true; do
     echo "1. 下载配置环境并设置地址"
     echo "2. 启动验证器"
     echo "3. 停止并删除验证器"
-    echo "4) 更新验证者（自动停止跟启动）"
-    echo "5) 查看日志"
-    echo "6) 创建pm2监控配置文件并启动"
+    echo "4. 更新验证者（自动停止跟启动）"
+    echo "5. 查看日志"
+    echo "6. 创建pm2监控配置文件并启动"
     echo "0. 退出"
     read -p "请输入命令: " command
 
@@ -111,7 +111,7 @@ while true; do
             ;;
 
         4)
-            #更新配置文件
+            # 更新配置文件
             echo "正在停止验证器，2秒后执行更新。"
             pm2 stop cysic-verifier
             sleep 2
@@ -131,7 +131,7 @@ while true; do
             ;;
 
         6)
-            # 创建pm2监控配置文件并启动
+            # 创建 pm2 监控配置文件并启动
             echo "创建 pm2 监控配置文件..."
             cat &lt;&lt; 'EOF' &gt; ~/cyjk.js
 const { spawn } = require('child_process');
