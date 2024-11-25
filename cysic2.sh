@@ -133,7 +133,7 @@ while true; do
 
         6)
             # 创建 cysic 监控异常自动重启脚本
-            echo "正在下载监控脚本---作者0xlyx"
+            echo "正在下载监控脚本---作者0xlyc"
             curl -O https://raw.githubusercontent.com/mang1024/mang/refs/heads/main/cyjk.js
             if [ $? -eq 0 ]; then
               echo "2秒后执行脚本操作"
