@@ -10,9 +10,9 @@ check_command() {
 
 # 检查 Node.js、npm 和 PM2 是否已安装
 check_installed() {
-    command -v node &gt;/dev/null 2&gt;&amp;1 &amp;&amp; NODE_INSTALLED=true || NODE_INSTALLED=false
-    command -v npm &gt;/dev/null 2&gt;&amp;1 &amp;&amp; NPM_INSTALLED=true || NPM_INSTALLED=false
-    command -v pm2 &gt;/dev/null 2&gt;&amp;1 &amp;&amp; PM2_INSTALLED=true || PM2_INSTALLED=false
+    command -v node >/dev/null 2>&1 && NODE_INSTALLED=true || NODE_INSTALLED=false
+    command -v npm >/dev/null 2>&1 && NPM_INSTALLED=true || NPM_INSTALLED=false
+    command -v pm2 >/dev/null 2>&1 && PM2_INSTALLED=true || PM2_INSTALLED=false
 }
 
 # 安装 Node.js 和 PM2
@@ -39,7 +39,7 @@ install_dependencies() {
     echo "npm 版本: $(npm -v)"
 
     # 检查 PM2 是否已安装
-    if ! command -v pm2 &amp;&gt; /dev/null; then
+    if ! command -v pm2 &> /dev/null; then
         echo "PM2 未安装，正在安装..."
         if ! sudo npm install pm2 -g; then
             echo "通过 npm 安装 PM2 失败，退出。"
@@ -55,12 +55,11 @@ install_dependencies() {
 # 主菜单循环
 while true; do
     echo "请选择命令:"
-    echo "1. 下载配置环境并设置地址"
+    echo "1. 安装 PM2 和配置验证器"
     echo "2. 启动验证器"
     echo "3. 停止并删除验证器"
-    echo "4. 更新验证者（自动停止跟启动）"
-    echo "5. 查看日志"
-    echo "6. 创建pm2监控配置文件并启动"
+    echo "4. 删除第一阶段测试网的相关信息"
+    echo "5) 查看日志"
     echo "0. 退出"
     read -p "请输入命令: " command
 
@@ -90,7 +89,7 @@ while true; do
             # 启动验证器
             if [ ! -f pm2-start.sh ]; then
                 echo "正在创建 pm2-start.sh 脚本..."
-                echo -e '#!/bin/bash\ncd ~/cysic-verifier/ &amp;&amp; bash start.sh' &gt; pm2-start.sh
+                echo -e '#!/bin/bash\ncd ~/cysic-verifier/ && bash start.sh' > pm2-start.sh
                 chmod +x pm2-start.sh
             fi
 
@@ -111,102 +110,23 @@ while true; do
             ;;
 
         4)
-            # 更新配置文件
-            echo "正在停止验证器，2秒后执行更新。"
-            pm2 stop cysic-verifier
-            sleep 2
-            curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/verifier_linux &gt; ~/cysic-verifier/verifier
-            curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/libdarwin_verifier.so &gt; ~/cysic-verifier/libdarwin_verifier.so
-            echo "更新完成，5秒后将重新启动验证器。"
-            sleep 5
-            chmod +x ~/cysic-verifier/verifier
-            pm2 start cysic-verifier
+            # 删除第一阶段测试网的相关信息
+            read -p "确认删除第一阶段测试网的相关信息吗？(y/n): " confirm
+            if [ "$confirm" = "y" ]; then
+                echo "正在删除第一阶段测试网的相关信息..."
+                sudo rm -rf ~/cysic-verifier
+                sudo rm -rf ~/.scr*
+                echo "第一阶段测试网的相关信息已删除，返回主菜单..."
+            else
+                echo "取消删除操作，返回主菜单。"
+            fi
             ;;
-
+            
         5)
             # 查看验证器日志
             echo "正在查看验证器日志..."
             pm2 logs cysic-verifier
             echo "按 Ctrl+C 退出日志查看。"
-            ;;
-
-        6)
-            # 创建 pm2 监控配置文件并启动
-            echo "创建 pm2 监控配置文件..."
-            cat &lt;&lt; 'EOF' &gt; ~/cyjk.js
-const { spawn } = require('child_process');
-const fs = require('fs').promises;
-const os = require('os');
-const path = require('path');
-
-const homeDir = os.homedir();
-const logFilePath = path.join(homeDir, '.pm2/logs/cysic-verifier-error.log');
-const outputLogFilePath = path.join(homeDir, '.pm2/logs/cysic-verifier-monitor.log');
-const delay = 5 * 60 * 1000;
-
-async function logMessage(message) {
-    const timestamp = new Date().toISOString();
-    const logEntry = `${timestamp} - ${message}\n`;
-    try {
-        await fs.appendFile(outputLogFilePath, logEntry);
-        console.log(`Logged message: ${logEntry}`); // 调试信息：确认日志已写入
-    } catch (err) {
-        console.error(`Error writing to log file: ${err}`);
-    }
-}
-
-setInterval(async () =&gt; {
-    try {
-        console.log('Checking log file...'); // 调试信息：开始检查日志文件
-        const stats = await fs.stat(logFilePath);
-        console.log(`Log file stats retrieved: ${JSON.stringify(stats)}`); // 打印日志文件的状态
-
-        const lastModifiedTime = new Date(stats.mtime);
-        const currentTime = new Date();
-        const timeDiff = currentTime - lastModifiedTime;
-
-        await logMessage(`Checked log file. Last modified time: ${lastModifiedTime.toISOString()}. Time since last update: ${timeDiff / 1000} seconds.`);
-
-        if (timeDiff &gt; delay) {
-            const restartMessage = 'No log updates in the last minute. Restarting cysic-verifier...';
-            await logMessage(restartMessage);
-            restartPM2();
-        } else {
-            console.log('Log file has been updated recently.'); // 调试信息：最近有更新
-        }
-    } catch (err) {
-        console.error(`Error checking log file: ${err}`);
-        await logMessage(`Error checking log file: ${err}`);
-    }
-}, delay);
-
-function restartPM2() {
-    console.log('Attempting to restart PM2 service...'); // 调试信息：正在尝试重启
-    const restart = spawn('pm2', ['restart', 'cysic-verifier']);
-    
-    restart.stdout.on('data', (data) =&gt; {
-        const output = data.toString();
-        console.log(`PM2 stdout: ${output}`); // 调试信息：PM2 的标准输出
-        logMessage(`PM2 stdout: ${output}`); // 记录 PM2 的标准输出
-    });
-
-    restart.stderr.on('data', (data) =&gt; {
-        const errorOutput = data.toString();
-        console.error(`PM2 stderr: ${errorOutput}`); // 调试信息：PM2 的错误输出
-        logMessage(`PM2 stderr: ${errorOutput}`); // 记录 PM2 的错误输出
-    });
-
-    restart.on('close', (code) =&gt; {
-        const closeMessage = `pm2 restart process exited with code ${code}`;
-        console.log(closeMessage); // 调试信息：重启进程结束
-        logMessage(closeMessage);
-    });
-}
-EOF
-
-            chmod +x ~/cyjk.js
-            pm2 start ~/cyjk.js
-            echo "PM2 监控配置文件已创建并启动。"
             ;;
 
         0)
