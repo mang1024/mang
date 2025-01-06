@@ -52,6 +52,51 @@ install_dependencies() {
     echo "PM2 版本: $(pm2 -v)"
 }
 
+# 创建和启动多个验证器实例
+create_and_start_instances() {
+    # 提示用户选择多开的编号
+    read -p "请输入要开启的副本编号: " number
+
+    # 检查输入是否为有效的数字
+    if ! [[ "$number" =~ ^[0-9]+$ ]] ; then
+       echo "错误: 请输入一个有效的数字"
+       exit 1
+    fi
+
+    # 提示用户输入新的地址
+    read -p "请输入新的地址: " new_address
+
+    # 检查输入是否为有效的地址（简单检查，可以根据需要改进）
+    if ! [[ "$new_address" =~ ^0x[a-fA-F0-9]{40}$ ]] ; then
+       echo "错误: 请输入一个有效的地址"
+       exit 1
+    fi
+
+    # 创建目录、复制内容、修改配置文件并使用 PM2 启动脚本
+    dir_name="cysic-verifier$number"
+    echo "正在创建目录 $dir_name 并复制内容..."
+    mkdir ~/$dir_name
+    cp -r ~/cysic-verifier/* ~/$dir_name/
+
+    # 修改配置文件中的地址信息
+    config_file="~/$dir_name/config.yaml"
+    if [ -f $config_file ]; then
+        echo "正在修改配置文件 $config_file 中的地址信息..."
+        sed -i "s/claim_reward_address: \".*\"/claim_reward_address: \"$new_address\"/" $config_file
+    else
+        echo "错误: 找不到配置文件 $config_file"
+        exit 1
+    fi
+
+    echo "使用 PM2 启动 $dir_name/start.sh..."
+    pm2 start ~/$dir_name/start.sh --name $dir_name
+
+    # 切换到主目录
+    cd ~
+
+    echo "操作完成！"
+}
+
 # 主菜单循环
 while true; do
     echo "华为云慎用！！！"
@@ -64,6 +109,7 @@ while true; do
     echo "4. 更新验证者（自动停止跟启动）"
     echo "5. 查看日志"
     echo "6. 创建 cysic 监控异常自动重启脚本----感谢作者0xlyc"
+    echo "7. 创建和启动多个验证器实例"
     echo "0. 退出"
     read -p "请输入命令: " command
 
@@ -115,7 +161,6 @@ while true; do
 
         4)
             # 更新配置文件
-            #更新配置文件
             echo "正在停止验证器，2秒后执行更新。"
             pm2 stop cysic-verifier
             sleep 2
@@ -150,6 +195,12 @@ while true; do
               echo "下载失败，请检查网络连接或URL是否正确"
             fi
             ;;
+
+        7)
+            # 创建和启动多个验证器实例
+            create_and_start_instances
+            ;;
+
         0)
             # 退出脚本
             echo "退出脚本..."
