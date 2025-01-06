@@ -195,11 +195,6 @@ while true; do
             fi
             ;;
 
-        7)
-            # 创建和启动多个验证器实例
-            create_and_start_instances
-            ;;
-
         0)
             # 退出脚本
             echo "退出脚本..."
