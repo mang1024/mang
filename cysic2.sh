@@ -78,6 +78,8 @@ create_and_start_instances() {
     mkdir ~/$dir_name
     cp -r ~/cysic-verifier/* ~/$dir_name/
 
+    # 确保 verifier 文件有执行权限
+    chmod +x ~/$dir_name/verifier
     # 修改配置文件中的地址信息
     config_file="$HOME/$dir_name/config.yaml"
     if [ -f $config_file ]; then
