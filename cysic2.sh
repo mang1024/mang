@@ -79,7 +79,7 @@ create_and_start_instances() {
     cp -r ~/cysic-verifier/* ~/$dir_name/
 
     # 修改配置文件中的地址信息
-    config_file="~/$dir_name/config.yaml"
+    config_file="$HOME/$dir_name/config.yaml"
     if [ -f $config_file ]; then
         echo "正在修改配置文件 $config_file 中的地址信息..."
         sed -i "s/claim_reward_address: \".*\"/claim_reward_address: \"$new_address\"/" $config_file
@@ -89,10 +89,7 @@ create_and_start_instances() {
     fi
 
     echo "使用 PM2 启动 $dir_name/start.sh..."
-    pm2 start ~/$dir_name/start.sh --name $dir_name
-
-    # 切换到主目录
-    cd ~
+    pm2 start $HOME/$dir_name/start.sh --name $dir_name
 
     echo "操作完成！"
 }
