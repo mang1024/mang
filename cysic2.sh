@@ -108,7 +108,6 @@ while true; do
     echo "4. 更新验证者（自动停止跟启动）"
     echo "5. 查看日志"
     echo "6. 创建 cysic 监控异常自动重启脚本----感谢作者0xlyc"
-    echo "7. 创建和启动多个验证器实例"
     echo "0. 退出"
     read -p "请输入命令: " command
 
