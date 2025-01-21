@@ -66,13 +66,13 @@ setup_multiple_verifiers() {
     if [ ! -d "$HOME/cysic-verifier" ]; then
         echo "❌ 基础验证者不存在，请先执行选项1安装！！"
         return 1
-    }
+    fi
 
     read -p "请输入要多开的数量: " num_instances
     if ! [[ "$num_instances" =~ ^[0-9]+$ ]] || [ "$num_instances" -lt 1 ]; then
         echo "❌ 请输入有效的正整数！"
         return 1
-    }
+    fi
 
     for ((i=1; i<=num_instances; i++)); do
         # 找到可用的目录编号
@@ -215,6 +215,7 @@ while true; do
             ;;
 
         0)
+            echo "感谢使用，欢迎加入电报群交流：https://t.me/mangmang888"
             echo "退出程序。"
             exit 0
             ;;
