@@ -1,5 +1,11 @@
 #!/bin/bash
 
+echo "==========================================="
+echo "     Cysic 验证者管理脚本 v1.0"
+echo "     作者: mang"
+echo "     免费分享，请勿商用"
+echo "==========================================="
+
 # 函数：检查命令是否成功执行
 check_command() {
     if [ $? -ne 0 ]; then
@@ -54,17 +60,17 @@ install_dependencies() {
 
 # 主菜单循环
 while true; do
-    echo "华为云慎用！！！"
-    echo "华为云慎用！！"
-    echo "华为云慎用！！"
+    echo "==========================================="
+    echo "国内华为云慎用！！！"
+    echo "国内华为云慎用！！"
     echo "请选择命令:"
     echo "1. 下载配置环境并设置地址"
     echo "2. 启动验证器"
     echo "3. 停止并删除验证器"
-    echo "4. 更新验证者（自动停止跟启动）"
+    echo "4. 更新验证器"
     echo "5. 查看日志"
-    echo "6. 创建 cysic 监控异常自动重启脚本----感谢作者0xlyc"
     echo "0. 退出"
+    echo "==========================================="
     read -p "请输入命令: " command
 
     case $command in
@@ -134,25 +140,7 @@ while true; do
             echo "按 Ctrl+C 退出日志查看。"
             ;;
 
-        6)
-            # 创建 cysic 监控异常自动重启脚本
-            echo "正在下载监控脚本---作者0xlyc"
-            curl -O https://raw.githubusercontent.com/mang1024/mang/refs/heads/main/cyjk.js
-            if [ $? -eq 0 ]; then
-              echo "2秒后执行脚本操作"
-              sleep 2
-              pm2 start ./cyjk.js --name "cyjk"
-              echo "查看异常重启日志请使用命令 pm2 logs cyjk"
-              pm2 save
-              sleep 5
-            else
-              echo "下载失败，请检查网络连接或URL是否正确"
-            fi
-            ;;
-
         0)
-            # 退出脚本
-            echo "退出脚本..."
             echo "退出程序。"
             exit 0
             ;;
