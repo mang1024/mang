@@ -105,13 +105,12 @@ setup_multiple_verifiers() {
 while true; do
     echo "==========================================="
     echo "选择命令:"
-    echo "1. 安装环境及验证者"
-    echo "2. 启动验证器"
-    echo "3. 停止并删除验证器"
-    echo "4. 更新验证器"
-    echo "5. 查看日志"
-    echo "6. 增加虚拟内存"
-    echo "7. 多开验证者"
+    echo "1. 安装并启动验证者"
+    echo "2. 更新验证者（暂不需要更新）"
+    echo "3. 停止所有验证器"
+    echo "4. 查看日志"
+    echo "5. 增加虚拟内存"
+    echo "6. 多开验证者"
     echo "0. 退出"
     echo "==========================================="
     read -p "输入命令: " command
@@ -129,29 +128,19 @@ while true; do
             echo "下载配置..."
             if curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/setup_linux.sh -o ~/setup_linux.sh; then
                 bash ~/setup_linux.sh "$reward_address"
+                # 直接启动验证器
+                cd ~/cysic-verifier/
+                if pm2 start start.sh --name cysic-verifier; then
+                    echo "✅ 验证者安装并启动成功"
+                else
+                    echo "❌ 启动失败"
+                fi
             else
                 echo "下载失败"
             fi
             ;;
 
         2)
-            echo "启动验证器..."
-            cd ~/cysic-verifier/
-            if pm2 start start.sh --name cysic-verifier; then
-                echo "✅ 启动成功"
-            else
-                echo "❌ 启动失败"
-            fi
-            ;;
-
-        3)
-            echo "停止验证器..."
-            pm2 stop cysic-verifier
-            pm2 delete cysic-verifier
-            echo "已停止"
-            ;;
-
-        4)
             echo "更新验证者..."
             pm2 stop cysic-verifier
             sleep 2
@@ -164,11 +153,22 @@ while true; do
             echo "更新完成"
             ;;
 
-        5)
+        3)
+            echo "停止所有验证器..."
+            # 获取所有 cysic-verifier 开头的进程并停止
+            pm2 list | grep "cysic-verifier" | awk '{print $2}' | while read -r name; do
+                pm2 stop "$name"
+                pm2 delete "$name"
+                echo "✅ 已停止并删除: $name"
+            done
+            echo "所有验证器已停止"
+            ;;
+
+        4)
             pm2 logs cysic-verifier
             ;;
             
-        6)
+        5)
             read -p "虚拟内存大小(GB): " swap_size
             if [[ "$swap_size" =~ ^[0-9]*\.?[0-9]+$ ]] && (( $(echo "$swap_size > 0" | bc -l) )); then
                 echo "创建 ${swap_size}GB 虚拟内存..."
@@ -189,7 +189,7 @@ while true; do
             fi
             ;;
 
-        7)
+        6)
             setup_multiple_verifiers
             ;;
 
