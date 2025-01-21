@@ -194,7 +194,6 @@ while true; do
             ;;
 
         0)
-            echo "欢迎加入电报群：https://t.me/mangmang888"
             exit 0
             ;;
 
