@@ -1,11 +1,11 @@
 #!/bin/bash
 
 echo "==========================================="
-echo "     Cysic 验证者脚本 v1.0"
+echo "     Cysic 验证者脚本 v2.0"
 echo "     作者: mang"
 echo "     免费分享，请勿商用"
-echo "     国内华为云慎用！！！"
-echo "     国内华为云慎用！！！"
+echo "     国内网华为云慎用！！！"
+echo "     国内网华为云慎用！！"
 echo "==========================================="
 
 # 函数：检查命令是否成功执行
@@ -60,14 +60,67 @@ install_dependencies() {
     echo "PM2 版本: $(pm2 -v)"
 }
 
+# 设置多开验证者
+setup_multiple_verifiers() {
+    # 检查基础验证者是否存在
+    if [ ! -d "$HOME/cysic-verifier" ]; then
+        echo "❌ 基础验证者不存在，请先执行选项1安装！！"
+        return 1
+    }
+
+    read -p "请输入要多开的数量: " num_instances
+    if ! [[ "$num_instances" =~ ^[0-9]+$ ]] || [ "$num_instances" -lt 1 ]; then
+        echo "❌ 请输入有效的正整数！"
+        return 1
+    }
+
+    for ((i=1; i<=num_instances; i++)); do
+        # 找到可用的目录编号
+        dir_num=1
+        while [ -d "$HOME/cysic-verifier$dir_num" ]; do
+            ((dir_num++))
+        done
+        
+        echo "----------------------------------------"
+        echo "正在设置第 $i 个验证者（将使用编号 $dir_num）"
+        read -p "请输入奖励地址: " reward_address
+        
+        # 创建新的验证者目录
+        echo "正在创建验证者 $dir_num..."
+        mkdir -p "$HOME/cysic-verifier$dir_num"
+        cp -r "$HOME/cysic-verifier/"* "$HOME/cysic-verifier$dir_num/"
+        
+        # 更新配置文件
+        if ! sed -i "s|claim_reward_address: \".*\"|claim_reward_address: \"$reward_address\"|" "$HOME/cysic-verifier$dir_num/config.yaml"; then
+            echo "❌ 更新配置文件失败！"
+            continue
+        fi
+        
+        # 启动新的验证者
+        cd "$HOME/cysic-verifier$dir_num" || continue
+        if pm2 start start.sh --name "cysic-verifier$dir_num"; then
+            echo "✅ 验证者 $dir_num 启动成功！"
+        else
+            echo "❌ 验证者 $dir_num 启动失败！"
+        fi
+        echo "----------------------------------------"
+    done
+    
+    echo "✅ 多开设置完成！当前运行的验证者："
+    pm2 list | grep cysic-verifier
+}
+
 # 主菜单循环
 while true; do
+    echo "==========================================="
     echo "请选择命令:"
     echo "1. 下载配置环境并设置地址"
     echo "2. 启动验证器"
     echo "3. 停止并删除验证器"
-    echo "4. 更新验证器"
+    echo "4. 更新验证者"
     echo "5. 查看日志"
+    echo "6. 增加虚拟内存"
+    echo "7. 多开验证者"
     echo "0. 退出"
     echo "==========================================="
     read -p "请输入命令: " command
@@ -96,17 +149,12 @@ while true; do
 
         2)
             # 启动验证器
-            if [ ! -f pm2-start.sh ]; then
-                echo "正在创建 pm2-start.sh 脚本..."
-                echo -e '#!/bin/bash\ncd ~/cysic-verifier/ && bash start.sh' > pm2-start.sh
-                chmod +x pm2-start.sh
-            fi
-
             echo "正在启动验证器..."
-            if pm2 start ./pm2-start.sh --interpreter bash --name cysic-verifier; then
-                echo "Cysic Verifier 启动完成，返回主菜单..."
+            cd ~/cysic-verifier/
+            if pm2 start start.sh --name cysic-verifier; then
+                echo "✅ Cysic Verifier 启动成功！"
             else
-                echo "启动失败，请检查 PM2 和脚本。"
+                echo "❌ 启动失败，请检查验证器配置。"
             fi
             ;;
 
@@ -137,6 +185,33 @@ while true; do
             echo "正在查看验证器日志..."
             pm2 logs cysic-verifier
             echo "按 Ctrl+C 退出日志查看。"
+            ;;
+            
+        6)
+            # 增加虚拟内存
+            read -p "请输入想要增加的虚拟内存大小(GB): " swap_size
+            if [[ "$swap_size" =~ ^[0-9]*\.?[0-9]+$ ]] && (( $(echo "$swap_size > 0" | bc -l) )); then
+                echo "正在创建 ${swap_size}GB 虚拟内存..."
+                if sudo fallocate -l ${swap_size}G /swapfile; then
+                    sudo chmod 600 /swapfile
+                    sudo mkswap /swapfile
+                    if sudo swapon /swapfile; then
+                        echo "✅ 虚拟内存创建成功！"
+                        echo "当前系统内存使用情况："
+                        free -h
+                    else
+                        echo "❌ 启用虚拟内存失败！"
+                    fi
+                else
+                    echo "❌ 创建虚拟内存文件失败！"
+                fi
+            else
+                echo "❌ 请输入有效的正数！"
+            fi
+            ;;
+
+        7)
+            setup_multiple_verifiers
             ;;
 
         0)
