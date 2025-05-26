@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "==========================================="
-echo "     Cysic 验证者脚本 v2.3"
+echo "     Cysic 验证者脚本 v2.4"
 echo "     作者: mang"
 echo "     免费分享，请勿商用"
 echo "     国内网华为云慎用！"
@@ -140,13 +140,6 @@ while true; do
             cd ~/cysic-verifier || { echo "❌ 无法进入验证器目录"; exit 1; }
             chmod +x start.sh
             check_command "设置 start.sh 执行权限失败"
-
-            # 测试运行 start.sh
-            echo "测试运行 start.sh..."
-            if ! bash start.sh; then
-                echo "❌ start.sh 测试运行失败，请检查日志"
-                exit 1
-            fi
 
             # 使用 PM2 启动
             echo "启动 PM2 进程..."
