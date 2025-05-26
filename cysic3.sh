@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "==========================================="
-echo "     Cysic 验证者脚本 v2.0"
+echo "     Cysic 验证者脚本 v2.1"
 echo "     作者: mang"
 echo "     免费分享，请勿商用"
 echo "     国内网华为云慎用！"
@@ -28,32 +28,31 @@ install_dependencies() {
     sudo apt update
     check_command "更新失败"
 
-    echo "安装 Node.js..."
-    if ! curl -fsSL `https://deb.nodesource.com/setup_18.x`  | sudo -E bash -; then
-        echo "尝试备用源..."
-        if ! curl -fsSL `https://deb.nodesource.com/setup_16.x`  | sudo -E bash -; then
-            echo "源添加失败"
-            exit 1
-        fi
-    fi
-
-    if ! sudo apt-get install -y nodejs; then
-        echo "安装失败"
-        exit 1
-    fi
-
+    echo "安装 Node.js 20.x LTS..."
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    
     echo "Node.js: $(node -v)"
     echo "npm: $(npm -v)"
 
-    if ! command -v pm2 &> /dev/null; then
-        echo "安装 PM2..."
-        if ! sudo npm install pm2 -g; then
-            echo "PM2 安装失败"
-            exit 1
-        fi
-    fi
-
+    echo "安装 PM2..."
+    sudo npm install pm2 -g
+    
     echo "PM2: $(pm2 -v)"
+}
+
+# 检查并安装 PowerShell
+install_powershell() {
+    if ! command -v pwsh &> /dev/null; then
+        echo "安装 PowerShell..."
+        # 对于Ubuntu/Debian
+        sudo apt-get install -y wget apt-transport-https
+        wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb
+        sudo dpkg -i packages-microsoft-prod.deb
+        sudo apt-get update
+        sudo apt-get install -y powershell
+        rm packages-microsoft-prod.deb
+    fi
 }
 
 # 设置多开验证者
@@ -64,7 +63,7 @@ setup_multiple_verifiers() {
     fi
 
     read -p "多开数量: " num_instances
-    if ! [["$num_instances" =~ ^[0-9]+$ ]] || [ "$num_instances" -lt 1 ]; then
+    if ! [[ "$num_instances" =~ ^[0-9]+$ ]] || [ "$num_instances" -lt 1 ]; then
         echo "❌ 请输入正确数字"
         return 1
     fi
@@ -122,15 +121,20 @@ while true; do
             else
                 echo "环境已安装"
             fi
+            
+            install_powershell
 
             read -p "奖励地址: " reward_address
             echo "下载配置..."
             if curl -L "https://github.com/cysic-labs/cysic-phase3/releases/download/v1.0.0/setup.ps1" -o "$HOME/setup_win.ps1"; then
+                # 确保目录存在
+                mkdir -p "$HOME/cysic-verifier"
+                
                 # 使用PM2启动PowerShell脚本
                 pm2 start "pwsh" --name "cysic-setup" -- -Command "$HOME/setup_win.ps1 -CLAIM_REWARD_ADDRESS '$reward_address'"
                 
                 # 进入验证器目录并使用PM2启动
-                cd "$HOME/cysic-verifier"
+                cd "$HOME/cysic-verifier" || { echo "❌ 无法进入验证器目录"; exit 1; }
                 pm2 start "pwsh" --name "cysic-verifier" -- -Command "./start.ps1"
                 
                 echo "✅ 验证者安装并启动成功"
