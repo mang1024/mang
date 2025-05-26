@@ -29,9 +29,9 @@ install_dependencies() {
     check_command "更新失败"
 
     echo "安装 Node.js..."
-    if ! curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -; then
+    if ! curl -fsSL `https://deb.nodesource.com/setup_18.x`  | sudo -E bash -; then
         echo "尝试备用源..."
-        if ! curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -; then
+        if ! curl -fsSL `https://deb.nodesource.com/setup_16.x`  | sudo -E bash -; then
             echo "源添加失败"
             exit 1
         fi
@@ -64,7 +64,7 @@ setup_multiple_verifiers() {
     fi
 
     read -p "多开数量: " num_instances
-    if ! [[ "$num_instances" =~ ^[0-9]+$ ]] || [ "$num_instances" -lt 1 ]; then
+    if ! [["$num_instances" =~ ^[0-9]+$ ]] || [ "$num_instances" -lt 1 ]; then
         echo "❌ 请输入正确数字"
         return 1
     fi
@@ -89,7 +89,7 @@ setup_multiple_verifiers() {
         fi
         
         cd "$HOME/cysic-verifier$dir_num" || continue
-        if pm2 start start.sh --name "cysic-verifier$dir_num"; then
+        if pm2 start "pwsh" --name "cysic-verifier$dir_num" -- -Command "./start.ps1"; then
             echo "✅ 验证者 $dir_num 已启动"
         else
             echo "❌ 启动失败"
@@ -106,10 +106,10 @@ while true; do
     echo "==========================================="
     echo "选择命令:"
     echo "1. 安装并启动验证者"
-    echo "2. 更新验证者（暂不需要更新）"
-    echo "3. 停止并删除所有验证者"
-    echo "4. 查看日志"
-    echo "5. 增加虚拟内存"
+    echo "2. 停止并删除所有验证者"
+    echo "3. 查看日志"
+    echo "4. 增加虚拟内存"
+    echo "5. 多开验证者"
     echo "0. 退出"
     echo "==========================================="
     read -p "输入命令: " command
@@ -125,36 +125,22 @@ while true; do
 
             read -p "奖励地址: " reward_address
             echo "下载配置..."
-            if curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/setup_linux.sh -o ~/setup_linux.sh; then
-                bash ~/setup_linux.sh "$reward_address"
-                # 直接启动验证器
-                cd ~/cysic-verifier/
-                if pm2 start start.sh --name cysic-verifier; then
-                    echo "✅ 验证者安装并启动成功"
-                else
-                    echo "❌ 启动失败"
-                fi
+            if curl -L "https://github.com/cysic-labs/cysic-phase3/releases/download/v1.0.0/setup.ps1" -o "$HOME/setup_win.ps1"; then
+                # 使用PM2启动PowerShell脚本
+                pm2 start "pwsh" --name "cysic-setup" -- -Command "$HOME/setup_win.ps1 -CLAIM_REWARD_ADDRESS '$reward_address'"
+                
+                # 进入验证器目录并使用PM2启动
+                cd "$HOME/cysic-verifier"
+                pm2 start "pwsh" --name "cysic-verifier" -- -Command "./start.ps1"
+                
+                echo "✅ 验证者安装并启动成功"
             else
-                echo "下载失败"
+                echo "❌ 下载失败"
             fi
             ;;
 
         2)
-            echo "更新验证者..."
-            pm2 stop cysic-verifier
-            sleep 2
-            sudo rm -rf ~/cysic-verifier/data
-            curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/verifier_linux > ~/cysic-verifier/verifier
-            curl -L https://github.com/cysic-labs/phase2_libs/releases/download/v1.0.0/libdarwin_verifier.so > ~/cysic-verifier/libdarwin_verifier.so
-            chmod +x ~/cysic-verifier/verifier
-            sleep 2
-            pm2 start cysic-verifier
-            echo "更新完成"
-            ;;
-
-        3)
             echo "停止所有验证器..."
-            # 获取所有 cysic-verifier 开头的进程并停止
             pm2 list | grep "cysic-verifier" | awk '{print $2}' | while read -r name; do
                 pm2 stop "$name"
                 pm2 delete "$name"
@@ -163,11 +149,11 @@ while true; do
             echo "所有验证器已停止"
             ;;
 
-        4)
+        3)
             pm2 logs cysic-verifier
             ;;
             
-        5)
+        4)
             read -p "虚拟内存大小(GB): " swap_size
             if [[ "$swap_size" =~ ^[0-9]*\.?[0-9]+$ ]] && (( $(echo "$swap_size > 0" | bc -l) )); then
                 echo "创建 ${swap_size}GB 虚拟内存..."
@@ -188,7 +174,7 @@ while true; do
             fi
             ;;
 
-        6)
+        5)
             setup_multiple_verifiers
             ;;
 
