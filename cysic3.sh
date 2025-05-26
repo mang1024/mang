@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "==========================================="
-echo "     Cysic 验证者脚本 v2.1"
+echo "     Cysic 验证者脚本 v2.3"
 echo "     作者: mang"
 echo "     免费分享，请勿商用"
 echo "     国内网华为云慎用！"
@@ -10,31 +10,26 @@ echo "==========================================="
 # 函数：检查命令是否成功执行
 check_command() {
     if [ $? -ne 0 ]; then
-        echo "执行失败: $1"
+        echo "❌ 执行失败: $1"
         exit 1
     fi
 }
 
-# 检查 Node.js、npm 和 PM2 是否已安装
+# 检查 PM2 是否已安装
 check_installed() {
-    command -v node >/dev/null 2>&1 && NODE_INSTALLED=true || NODE_INSTALLED=false
-    command -v npm >/dev/null 2>&1 && NPM_INSTALLED=true || NPM_INSTALLED=false
     command -v pm2 >/dev/null 2>&1 && PM2_INSTALLED=true || PM2_INSTALLED=false
 }
 
-# 安装 Node.js 和 PM2
-install_dependencies() {
+# 安装 PM2
+install_pm2() {
     echo "更新软件包..."
     sudo apt update
-    check_command "更新失败"
+    check_command "更新软件包失败"
 
-    echo "安装 Node.js 20.x LTS..."
+    echo "安装 Node.js 20.x LTS（PM2 依赖）..."
     curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo apt-get install -y nodejs
     check_command "Node.js 安装失败"
-    
-    echo "Node.js: $(node -v)"
-    echo "npm: $(npm -v)"
 
     echo "安装 PM2..."
     sudo npm install pm2 -g
@@ -104,60 +99,62 @@ while true; do
     case $command in
         1)
             check_installed
-            if [ "$NODE_INSTALLED" = false ] || [ "$NPM_INSTALLED" = false ] || [ "$PM2_INSTALLED" = false ]; then
-                install_dependencies
+            if [ "$PM2_INSTALLED" = false ]; then
+                install_pm2
             else
-                echo "环境已安装"
+                echo "PM2 已安装"
             fi
 
             read -p "奖励地址: " reward_address
-            echo "下载配置..."
+            if [ -z "$reward_address" ]; then
+                echo "❌ 奖励地址不能为空"
+                exit 1
+            fi
+            echo "下载并运行配置脚本..."
 
-            # 删除旧的cysic-verifier目录，创建新的目录，并下载必要的文件
-            rm -rf ~/cysic-verifier
-            mkdir -p ~/cysic-verifier
-            curl -L https://github.com/cysic-labs/zk-verifier/releases/download/v0.4/verifier -o ~/cysic-verifier/verifier
-            check_command "下载 verifier 失败"
-            curl -L https://github.com/cysic-labs/zk-verifier/releases/download/v0.4/libdarwin_verifier.so -o ~/cysic-verifier/libdarwin_verifier.so
-            check_command "下载 libdarwin_verifier.so 失败"
-            curl -L https://github.com/cysic-labs/zk-verifier/releases/download/v0.4/librsp.so -o ~/cysic-verifier/librsp.so
-            check_command "下载 librsp.so 失败"
+            # 下载并运行 setup_linux.sh
+            curl -L https://github.com/cysic-labs/cysic-phase3/releases/download/v1.0.0/setup_linux.sh > ~/setup_linux.sh
+            check_command "下载 setup_linux.sh 失败"
+            chmod +x ~/setup_linux.sh
+            check_command "设置 setup_linux.sh 执行权限失败"
 
-            # 创建配置文件
-            cat <<EOF >~/cysic-verifier/config.yaml
-# Not Change
-chain:
-  # Not Change
-  endpoint: "grpc-testnet.prover.xyz:80"
-  # Not Change
-  chain_id: "cysicmint_9001-1"
-  # Not Change
-  gas_coin: "CYS"
-  # Not Change
-  gas_price: 10
-  # Modify Here：! Your Address (EVM) submitted to claim rewards
-claim_reward_address: "$reward_address"
+            # 执行 setup_linux.sh
+            bash ~/setup_linux.sh "$reward_address"
+            check_command "运行 setup_linux.sh 失败"
 
-server:
-  # don't modify this
-  cysic_endpoint: "https://ws-pre.prover.xyz"
-EOF
-            check_command "创建 config.yaml 失败"
+            # 验证 cysic-verifier 目录和 start.sh 是否存在
+            if [ ! -d "$HOME/cysic-verifier" ]; then
+                echo "❌ cysic-verifier 目录未生成"
+                exit 1
+            fi
+            if [ ! -f "$HOME/cysic-verifier/start.sh" ]; then
+                echo "❌ start.sh 文件未生成"
+                exit 1
+            fi
+            if [ ! -f "$HOME/cysic-verifier/config.yaml" ]; then
+                echo "❌ config.yaml 文件未生成"
+                exit 1
+            fi
 
-            # 设置执行权限并启动verifier
-            cd ~/cysic-verifier/ || { echo "❌ 无法进入验证器目录"; exit 1; }
-            chmod +x ~/cysic-verifier/verifier
-            check_command "设置 verifier 执行权限失败"
-            echo "LD_LIBRARY_PATH=. CHAIN_ID=534352 ./verifier" >~/cysic-verifier/start.sh
-            check_command "创建 start.sh 失败"
-            chmod +x ~/cysic-verifier/start.sh
+            # 进入 cysic-verifier 目录并设置 start.sh
+            cd ~/cysic-verifier || { echo "❌ 无法进入验证器目录"; exit 1; }
+            chmod +x start.sh
             check_command "设置 start.sh 执行权限失败"
 
-            # 使用PM2启动
+            # 测试运行 start.sh
+            echo "测试运行 start.sh..."
+            if ! bash start.sh; then
+                echo "❌ start.sh 测试运行失败，请检查日志"
+                exit 1
+            fi
+
+            # 使用 PM2 启动
+            echo "启动 PM2 进程..."
             if pm2 start "./start.sh" --name "cysic-verifier"; then
                 echo "✅ 验证者安装并启动成功"
+                pm2 save
             else
-                echo "❌ 启动失败"
+                echo "❌ PM2 启动失败"
                 exit 1
             fi
             ;;
