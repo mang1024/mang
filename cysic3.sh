@@ -37,52 +37,6 @@ install_pm2() {
     
     echo "PM2: $(pm2 -v)"
 }
-
-# 设置多开验证者
-setup_multiple_verifiers() {
-    if [ ! -d "$HOME/cysic-verifier" ]; then
-        echo "❌ 请先执行选项1安装基础验证者"
-        return 1
-    fi
-
-    read -p "多开数量: " num_instances
-    if ! [[ "$num_instances" =~ ^[0-9]+$ ]] || [ "$num_instances" -lt 1 ]; then
-        echo "❌ 请输入正确数字"
-        return 1
-    fi
-
-    for ((i=1; i<=num_instances; i++)); do
-        dir_num=1
-        while [ -d "$HOME/cysic-verifier$dir_num" ]; do
-            ((dir_num++))
-        done
-        
-        echo "----------------------------------------"
-        echo "设置第 $i 个验证者（编号 $dir_num）"
-        read -p "奖励地址: " reward_address
-        
-        echo "创建验证者 $dir_num..."
-        mkdir -p "$HOME/cysic-verifier$dir_num"
-        cp -r "$HOME/cysic-verifier/"* "$HOME/cysic-verifier$dir_num/"
-        
-        if ! sed -i "s|claim_reward_address: \".*\"|claim_reward_address: \"$reward_address\"|" "$HOME/cysic-verifier$dir_num/config.yaml"; then
-            echo "❌ 配置失败"
-            continue
-        fi
-        
-        cd "$HOME/cysic-verifier$dir_num" || continue
-        if pm2 start "./start.sh" --name "cysic-verifier$dir_num"; then
-            echo "✅ 验证者 $dir_num 已启动"
-        else
-            echo "❌ 启动失败"
-        fi
-        echo "----------------------------------------"
-    done
-    
-    echo "✅ 多开完成，当前运行："
-    pm2 list | grep cysic-verifier
-}
-
 # 主菜单循环
 while true; do
     echo "==========================================="
@@ -91,7 +45,6 @@ while true; do
     echo "2. 停止并删除所有验证者"
     echo "3. 查看日志"
     echo "4. 增加虚拟内存"
-    echo "5. 多开验证者"
     echo "0. 退出"
     echo "==========================================="
     read -p "输入命令: " command
