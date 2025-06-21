@@ -192,7 +192,7 @@ while true; do
                     echo "❌ 输入无效"
                 fi
                 ;;
-            6)
+            5)
                 setup_multiple_verifiers
                 ;;
             0)
