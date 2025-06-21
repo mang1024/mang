@@ -46,12 +46,13 @@ setup_multiple_verifiers() {
         return
     fi
 
-    # 查找现有的验证者目录，确定下一个序号
+    # 查找现有的验证者目录，确定起始序号
     next_index=1
-    while [ -d "$HOME/cysic-verifier$next_index" ]; do
+    while [ -d "$HOME/cysic-verifier$next_index" ] || pm2 list | grep -q "cysic-verifier$next_index"; do
         ((next_index++))
     done
 
+    created_count=0
     for ((i=1; i<=verifier_count; i++)); do
         current_index=$next_index
         ((next_index++))
@@ -60,6 +61,18 @@ setup_multiple_verifiers() {
         if [ -z "$reward_address" ]; then
             echo "❌ 奖励地址不能为空"
             return
+        fi
+
+        # 检查 PM2 进程是否已存在
+        if pm2 list | grep -q "cysic-verifier$current_index"; then
+            echo "⚠️ PM2 进程 cysic-verifier$current_index 已存在，跳过创建"
+            continue
+        fi
+
+        # 检查目录是否已存在
+        if [ -d "$HOME/cysic-verifier$current_index" ]; then
+            echo "⚠️ 目录 cysic-verifier$current_index 已存在，跳过创建"
+            continue
         fi
 
         echo "创建验证者目录 cysic-verifier$current_index..."
@@ -85,14 +98,17 @@ setup_multiple_verifiers() {
         if pm2 start ./start.sh --name "cysic-verifier$current_index"; then
             echo "✅ 验证者 cysic-verifier$current_index 启动成功"
             pm2 save
+            ((created_count++))
         else
             echo "❌ PM2 启动 cysic-verifier$current_index 失败"
             exit 1
         fi
 
-        # 返回主目录以便下一次循环
+        # 返回主目录
         cd ~ || { echo "❌ 无法返回主目录"; exit 1; }
     done
+
+    echo "✅ 成功创建并启动 $created_count 个验证者"
 }
 
 # 主菜单循环
@@ -182,24 +198,29 @@ while true; do
                     if sudo swapon /swapfile; then
                         echo "✅ 创建成功"
                         free -h
- Bern                        else
-                            echo "❌ 启用失败"
-                        fi
                     else
-                        echo "❌ 创建失败"
+                        echo "❌ 启用失败"
                     fi
                 else
-                    echo "❌ 输入无效"
+                    echo "❌ 创建失败"
                 fi
-                ;;
-            5)
-                setup_multiple_verifiers
-                ;;
-            0)
-                exit 0
-                ;;
-            *)
-                echo "无效选项"
-                ;;
-        esac
-    done
+            else
+                echo "❌ 输入无效"
+            fi
+            ;;
+        5)
+            # 确保基础 cysic-verifier 目录存在
+            if [ ! -d "$HOME/cysic-verifier" ]; then
+                echo "❌ 请先运行选项 1 安装并启动基础验证者"
+                continue
+            fi
+            setup_multiple_verifiers
+            ;;
+        0)
+            exit 0
+            ;;
+        *)
+            echo "无效选项"
+            ;;
+    esac
+done
